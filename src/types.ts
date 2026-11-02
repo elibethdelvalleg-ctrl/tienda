@@ -23,6 +23,22 @@ export interface Product {
   minWholesaleQty?: number;
   supplierOrigin?: string;
   pricingNotice?: string;
+  rating?: number;
+  reviewCount?: number;
+  reviews?: ProductReview[];
+}
+
+export interface ProductReview {
+  id: string;
+  productId: string;
+  userName: string;
+  userCity: string;
+  rating: number; // 1-5
+  comment: string;
+  fitFeedback?: 'exacta' | 'pequena' | 'grande';
+  verifiedBuyer?: boolean;
+  createdAt: string;
+  helpfulCount?: number;
 }
 
 export interface CartItem {

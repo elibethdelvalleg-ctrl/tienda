@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import {
   X, BarChart3, Package, ShoppingCart, Sparkles, Settings, Globe, Plus, Trash2, Edit2,
-  Check, RefreshCw, Eye, MessageCircle, ExternalLink, Printer, DollarSign, TrendingUp,
-  AlertTriangle, Upload, Camera, Image as ImageIcon, Sliders, CheckCircle2
+  Check, RefreshCw, Eye, EyeOff, MessageCircle, ExternalLink, Printer, DollarSign, TrendingUp,
+  AlertTriangle, Upload, Camera, Image as ImageIcon, Sliders, CheckCircle2, Search, RotateCcw
 } from 'lucide-react';
 import { Product, Order, StoreConfig, TrendInsight } from '../types.ts';
 import { formatUsd, formatBs, calculateBs } from '../utils/formatters.ts';
@@ -19,6 +19,7 @@ interface AdminDashboardProps {
   onUpdateProducts: (products: Product[]) => void;
   onUpdateOrders: (orders: Order[]) => void;
   onUpdateConfig: (newConfig: StoreConfig) => void;
+  onResetCatalog?: () => void;
 }
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({
@@ -33,11 +34,25 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   onUpdateProducts,
   onUpdateOrders,
   onUpdateConfig,
+  onResetCatalog,
 }) => {
   if (!isOpen) return null;
 
-  const [activeTab, setActiveTab] = useState<'stats' | 'inventory' | 'orders' | 'trends' | 'settings' | 'seo'>('stats');
+  // Defaults directly to 'inventory' for rapid catalog management (poner y quitar prendas)
+  const [activeTab, setActiveTab] = useState<'inventory' | 'stats' | 'orders' | 'trends' | 'settings' | 'seo'>('inventory');
   
+  // Inventory Search & Filter states
+  const [invSearch, setInvSearch] = useState<string>('');
+  const [invCategory, setInvCategory] = useState<string>('todos');
+  const [invStockFilter, setInvStockFilter] = useState<'all' | 'in_stock' | 'low_stock' | 'out_of_stock'>('all');
+  const [productToDelete, setProductToDelete] = useState<Product | null>(null);
+  const [adminToast, setAdminToast] = useState<{ message: string; type: 'success' | 'delete' | 'info' } | null>(null);
+
+  const triggerToast = (message: string, type: 'success' | 'delete' | 'info' = 'success') => {
+    setAdminToast({ message, type });
+    setTimeout(() => setAdminToast(null), 3500);
+  };
+
   // BCV local edit & live sync
   const [bcvInput, setBcvInput] = useState<string>(bcvRate.toString());
   const [bcvSaving, setBcvSaving] = useState<boolean>(false);
@@ -62,7 +77,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [prodSizes, setProdSizes] = useState('S, M, L');
   const [prodColors, setProdColors] = useState('Negro, Beige');
   const [prodIsBespoke, setProdIsBespoke] = useState(false);
-  const [prodImage, setProdImage] = useState('/src/assets/images/lenceria_intima_dama_1793412626756.jpg');
+  const [prodImage, setProdImage] = useState('./images/lenceria_intima_dama_1793412626756.jpg');
   const [prodSupplierOrigin, setProdSupplierOrigin] = useState('Mayoristas Galpones El Cementerio / La Hoyada');
   const [prodPricingNotice, setProdPricingNotice] = useState('Precio referencial sujeto a cambios según disponibilidad de mayoristas. Negociable por volumen.');
   const [prodIsNegotiable, setProdIsNegotiable] = useState<boolean>(true);
@@ -71,12 +86,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [imageUploadError, setImageUploadError] = useState<string | null>(null);
 
   const venezuelaPresets = [
-    { label: 'Lencería & Bralette Dama', url: '/src/assets/images/lenceria_intima_dama_1793412626756.jpg', cat: 'intima' },
-    { label: 'Jeans Colombiano Levanta Cola', url: '/src/assets/images/jeans_colombiano_dama_1793412627102.jpg', cat: 'pantalones' },
-    { label: 'Conjunto Deportivo Suplex', url: '/src/assets/images/conjunto_deportivo_suplex_1793412627777.jpg', cat: 'deportivo' },
-    { label: 'Gymwear & Dry-Fit Hombre', url: '/src/assets/images/ropa_deportiva_caballero_1793412628454.jpg', cat: 'caballero' },
-    { label: 'Atelier Por Encargo', url: '/src/assets/images/collection_por_encargo_1793411524038.jpg', cat: 'encargo' },
-    { label: 'Moda Femenina Elegante', url: '/src/assets/images/collection_woman_gold_1793411522165.jpg', cat: 'mujer' }
+    { label: 'Lencería & Bralette Dama', url: './images/lenceria_intima_dama_1793412626756.jpg', cat: 'intima' },
+    { label: 'Jeans Colombiano Levanta Cola', url: './images/jeans_colombiano_dama_1793412627102.jpg', cat: 'pantalones' },
+    { label: 'Conjunto Deportivo Suplex', url: './images/conjunto_deportivo_suplex_1793412627777.jpg', cat: 'deportivo' },
+    { label: 'Gymwear & Dry-Fit Hombre', url: './images/ropa_deportiva_caballero_1793412628454.jpg', cat: 'caballero' },
+    { label: 'Atelier Por Encargo', url: './images/collection_por_encargo_1793411524038.jpg', cat: 'encargo' },
+    { label: 'Moda Femenina Elegante', url: './images/collection_woman_gold_1793411522165.jpg', cat: 'mujer' }
   ];
 
   // AI Trends states
@@ -169,7 +184,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     setProdSizes('S, M, L');
     setProdColors('Surtido');
     setProdIsBespoke(false);
-    setProdImage('/src/assets/images/lenceria_intima_dama_1793412626756.jpg');
+    setProdImage('./images/lenceria_intima_dama_1793412626756.jpg');
     setProdSupplierOrigin('Mayoristas Galpones El Cementerio / La Hoyada');
     setProdPricingNotice('Precio referencial sujeto a cambios según disponibilidad de mayoristas. Negociable por volumen.');
     setProdIsNegotiable(true);
@@ -203,7 +218,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     setShowProductModal(true);
   };
 
-  // Save product
+  // Save product (Poner prenda / Guardar edición)
   const handleSaveProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     const sizesArray = prodSizes.split(',').map(s => s.trim()).filter(Boolean);
@@ -245,6 +260,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       } catch (err) {
         onUpdateProducts(products.map(p => p.id === editingProduct.id ? { ...editingProduct, ...productData } : p));
       }
+      triggerToast(`Prenda "${prodName}" actualizada correctamente`, 'success');
     } else {
       try {
         const res = await fetch('/api/products', {
@@ -258,19 +274,44 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         const fallback = { id: `prod-${Date.now()}`, slug: prodName.toLowerCase(), ...productData };
         onUpdateProducts([fallback as any, ...products]);
       }
+      triggerToast(`¡Prenda "${prodName}" añadida al catálogo con éxito!`, 'success');
     }
 
     setShowProductModal(false);
   };
 
-  const handleDeleteProduct = async (id: string) => {
-    if (!confirm("¿Seguro que deseas eliminar este producto?")) return;
+  // Confirm delete (Quitar prenda a voluntad)
+  const handleConfirmDelete = async () => {
+    if (!productToDelete) return;
+    const target = productToDelete;
     try {
-      await fetch(`/api/products/${id}`, { method: 'DELETE' });
+      await fetch(`/api/products/${target.id}`, { method: 'DELETE' });
     } catch (err) {
       console.error(err);
     }
-    onUpdateProducts(products.filter(p => p.id !== id));
+    onUpdateProducts(products.filter(p => p.id !== target.id));
+    triggerToast(`Prenda "${target.name}" eliminada del catálogo`, 'delete');
+    setProductToDelete(null);
+  };
+
+  // Toggle Stock availability (Pausar / Agotar sin eliminar definitivamente)
+  const handleToggleStock = async (p: Product) => {
+    const newStock = p.stock > 0 ? 0 : 25;
+    const updated = { ...p, stock: newStock };
+    try {
+      await fetch(`/api/products/${p.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ stock: newStock })
+      });
+    } catch {}
+    onUpdateProducts(products.map(item => item.id === p.id ? updated : item));
+    triggerToast(
+      newStock === 0 
+        ? `"${p.name}" marcada como Agotada / Pausada temporalmente` 
+        : `"${p.name}" reactivada con 25 unidades en stock`,
+      'info'
+    );
   };
 
   // Order Status update
@@ -402,6 +443,18 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         {/* Navigation Tabs (Functional segmented navigation) */}
         <div className="flex items-center px-6 border-b border-[#3B2A10]/10 dark:border-[#D4B24C]/20 bg-white dark:bg-[#16120E] overflow-x-auto no-scrollbar gap-2 py-2">
           <button
+            onClick={() => setActiveTab('inventory')}
+            className={`px-3.5 py-2 text-xs font-bold rounded-lg flex items-center gap-2 whitespace-nowrap cursor-pointer transition-all ${
+              activeTab === 'inventory'
+                ? 'bg-[#3B2A10] dark:bg-[#D4B24C] text-[#D4B24C] dark:text-[#12100E] shadow-xs'
+                : 'text-[#3B2A10]/80 dark:text-[#FBF7EE]/80 hover:bg-[#3B2A10]/5 dark:hover:bg-white/5'
+            }`}
+          >
+            <Package className="w-4 h-4" />
+            <span>Catálogo: Poner / Quitar Prendas ({products.length})</span>
+          </button>
+
+          <button
             onClick={() => setActiveTab('stats')}
             className={`px-3.5 py-2 text-xs font-semibold rounded-lg flex items-center gap-2 whitespace-nowrap cursor-pointer transition-all ${
               activeTab === 'stats'
@@ -411,18 +464,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           >
             <BarChart3 className="w-4 h-4" />
             <span>Resumen & Métricas</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('inventory')}
-            className={`px-3.5 py-2 text-xs font-semibold rounded-lg flex items-center gap-2 whitespace-nowrap cursor-pointer transition-all ${
-              activeTab === 'inventory'
-                ? 'bg-[#3B2A10] dark:bg-[#D4B24C] text-[#FBF7EE] dark:text-[#12100E] shadow-xs'
-                : 'text-[#3B2A10]/70 dark:text-[#FBF7EE]/70 hover:bg-[#3B2A10]/5 dark:hover:bg-white/5'
-            }`}
-          >
-            <Package className="w-4 h-4" />
-            <span>Inventario & Prendas ({products.length})</span>
           </button>
 
           <button
@@ -579,111 +620,318 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             </div>
           )}
 
-          {/* TAB 2: INVENTORY & PRODUCTS */}
+          {/* TAB 2: INVENTORY & PRODUCTS (PONER Y QUITAR PRENDAS A VOLUNTAD) */}
           {activeTab === 'inventory' && (
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
+              {/* Toast Feedback Banner */}
+              {adminToast && (
+                <div className={`p-3 rounded-xl flex items-center justify-between text-xs font-semibold shadow-sm transition-all ${
+                  adminToast.type === 'delete'
+                    ? 'bg-red-900/90 text-red-100 border border-red-500/40'
+                    : adminToast.type === 'info'
+                    ? 'bg-[#3B2A10] text-[#D4B24C] border border-[#D4B24C]/40'
+                    : 'bg-emerald-900/90 text-emerald-100 border border-emerald-500/40'
+                }`}>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-[#D4B24C]" />
+                    <span>{adminToast.message}</span>
+                  </div>
+                  <button onClick={() => setAdminToast(null)} className="text-white/60 hover:text-white cursor-pointer">
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+
+              {/* Header Action Bar */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-white dark:bg-[#1A1612] rounded-xl border border-[#3B2A10]/10 dark:border-[#D4B24C]/20 shadow-xs">
                 <div>
-                  <h3 className="font-display text-base font-bold">Catálogo de Prendas & Stock</h3>
-                  <p className="text-xs text-[#3B2A10]/60 dark:text-[#FBF7EE]/60">
-                    Gestiona disponibilidad inmediata, variantes y prendas bajo encargo
+                  <h3 className="font-display text-base font-bold text-[#3B2A10] dark:text-[#F4E7BD] flex items-center gap-2">
+                    <span>Gestión de Prendas del Catálogo</span>
+                    <span className="px-2 py-0.5 bg-[#D4B24C]/20 text-[#B8962E] dark:text-[#D4B24C] text-[11px] font-mono rounded-full font-bold">
+                      {products.length} prendas
+                    </span>
+                  </h3>
+                  <p className="text-xs text-[#3B2A10]/60 dark:text-[#FBF7EE]/60 mt-0.5">
+                    Pon y quita prendas del catálogo a voluntad. Sube fotos desde tu dispositivo o enlaces, y fija precios en USD con cálculo automático en Bs. (Tasa BCV).
                   </p>
                 </div>
-                <button
-                  onClick={openNewProductModal}
-                  className="px-4 py-2 bg-[#3B2A10] dark:bg-[#D4B24C] text-[#FBF7EE] dark:text-[#12100E] hover:bg-[#231809] text-xs font-semibold rounded-lg flex items-center gap-1.5 cursor-pointer shadow-sm"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>Nueva Prenda</span>
-                </button>
+
+                <div className="flex items-center gap-2 shrink-0">
+                  {onResetCatalog && (
+                    <button
+                      type="button"
+                      onClick={onResetCatalog}
+                      className="px-3 py-2 border border-[#3B2A10]/20 dark:border-[#D4B24C]/30 hover:bg-[#3B2A10]/5 text-[#3B2A10]/80 dark:text-[#FBF7EE]/80 text-xs font-semibold rounded-lg flex items-center gap-1.5 cursor-pointer transition-colors"
+                      title="Restaurar catálogo inicial de mayoristas venezolanos"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5" />
+                      <span className="hidden md:inline">Restaurar Catálogo Base</span>
+                    </button>
+                  )}
+                  <button
+                    onClick={openNewProductModal}
+                    className="px-4 py-2 bg-gradient-to-r from-[#B8962E] to-[#D4B24C] hover:from-[#9E7F25] hover:to-[#B8962E] text-[#12100E] text-xs font-bold rounded-lg flex items-center gap-1.5 cursor-pointer shadow-sm hover:shadow transition-all"
+                  >
+                    <Plus className="w-4 h-4 stroke-[3]" />
+                    <span>+ Poner Nueva Prenda</span>
+                  </button>
+                </div>
               </div>
 
-              {/* Table */}
+              {/* Filters Bar: Search & Category Chips */}
+              <div className="p-3 bg-white dark:bg-[#1A1612] rounded-xl border border-[#3B2A10]/10 dark:border-[#D4B24C]/20 space-y-3">
+                <div className="flex flex-col sm:flex-row items-center gap-3">
+                  {/* Search box */}
+                  <div className="relative flex-1 w-full">
+                    <Search className="absolute left-3 top-2.5 w-4 h-4 text-[#3B2A10]/40 dark:text-[#FBF7EE]/40" />
+                    <input
+                      type="text"
+                      value={invSearch}
+                      onChange={(e) => setInvSearch(e.target.value)}
+                      placeholder="Buscar por nombre de prenda, SKU, tela..."
+                      className="w-full pl-9 pr-8 py-2 bg-[#FBF7EE] dark:bg-[#12100E] border border-[#3B2A10]/15 dark:border-[#D4B24C]/20 rounded-lg text-xs focus:outline-hidden focus:border-[#B8962E]"
+                    />
+                    {invSearch && (
+                      <button
+                        onClick={() => setInvSearch('')}
+                        className="absolute right-2.5 top-2 text-[#3B2A10]/40 hover:text-[#3B2A10] cursor-pointer"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Stock filter selector */}
+                  <div className="flex items-center gap-1 self-stretch sm:self-auto text-xs shrink-0 bg-[#FBF7EE] dark:bg-[#12100E] p-1 rounded-lg border border-[#3B2A10]/10 dark:border-[#D4B24C]/20">
+                    <span className="text-[11px] font-semibold text-[#3B2A10]/60 dark:text-[#FBF7EE]/60 px-1.5">Stock:</span>
+                    <button
+                      onClick={() => setInvStockFilter('all')}
+                      className={`px-2 py-1 rounded-md text-[11px] font-semibold transition-colors cursor-pointer ${
+                        invStockFilter === 'all'
+                          ? 'bg-[#3B2A10] text-white dark:bg-[#D4B24C] dark:text-[#12100E]'
+                          : 'text-[#3B2A10]/70 dark:text-[#FBF7EE]/70 hover:bg-black/5'
+                      }`}
+                    >
+                      Todos ({products.length})
+                    </button>
+                    <button
+                      onClick={() => setInvStockFilter('in_stock')}
+                      className={`px-2 py-1 rounded-md text-[11px] font-semibold transition-colors cursor-pointer ${
+                        invStockFilter === 'in_stock'
+                          ? 'bg-[#3B2A10] text-white dark:bg-[#D4B24C] dark:text-[#12100E]'
+                          : 'text-[#3B2A10]/70 dark:text-[#FBF7EE]/70 hover:bg-black/5'
+                      }`}
+                    >
+                      En Stock ({products.filter(p => p.stock > 5).length})
+                    </button>
+                    <button
+                      onClick={() => setInvStockFilter('low_stock')}
+                      className={`px-2 py-1 rounded-md text-[11px] font-semibold transition-colors cursor-pointer ${
+                        invStockFilter === 'low_stock'
+                          ? 'bg-amber-600 text-white'
+                          : 'text-amber-700 dark:text-amber-400 hover:bg-amber-500/10'
+                      }`}
+                    >
+                      Bajo ({products.filter(p => p.stock > 0 && p.stock <= 5).length})
+                    </button>
+                    <button
+                      onClick={() => setInvStockFilter('out_of_stock')}
+                      className={`px-2 py-1 rounded-md text-[11px] font-semibold transition-colors cursor-pointer ${
+                        invStockFilter === 'out_of_stock'
+                          ? 'bg-red-600 text-white'
+                          : 'text-red-600 dark:text-red-400 hover:bg-red-500/10'
+                      }`}
+                    >
+                      Pausadas ({products.filter(p => p.stock === 0).length})
+                    </button>
+                  </div>
+                </div>
+
+                {/* Category Chips */}
+                <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-1 text-xs">
+                  <span className="text-[11px] text-[#3B2A10]/50 dark:text-[#FBF7EE]/50 font-medium shrink-0">Categoría:</span>
+                  {[
+                    { id: 'todos', label: 'Todas' },
+                    { id: 'intima', label: 'Ropa Íntima Dama' },
+                    { id: 'pantalones', label: 'Pantalones & Jeans' },
+                    { id: 'deportivo', label: 'Franelas & Deportivo' },
+                    { id: 'caballero', label: 'Caballeros' },
+                    { id: 'mujer', label: 'Mujer / Gala' },
+                    { id: 'encargo', label: 'Por Encargo' }
+                  ].map(cat => (
+                    <button
+                      key={cat.id}
+                      onClick={() => setInvCategory(cat.id)}
+                      className={`px-2.5 py-1 rounded-full text-[11px] font-semibold transition-all whitespace-nowrap cursor-pointer ${
+                        invCategory === cat.id
+                          ? 'bg-[#B8962E] text-white shadow-xs'
+                          : 'bg-[#FBF7EE] dark:bg-[#12100E] border border-[#3B2A10]/15 dark:border-[#D4B24C]/20 text-[#3B2A10]/70 dark:text-[#FBF7EE]/70 hover:border-[#B8962E]'
+                      }`}
+                    >
+                      {cat.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Table of Products */}
               <div className="overflow-x-auto bg-white dark:bg-[#1A1612] rounded-xl border border-[#3B2A10]/10 dark:border-[#D4B24C]/20 shadow-xs">
-                <table className="w-full text-left text-xs">
-                  <thead className="bg-[#3B2A10]/5 dark:bg-[#FBF7EE]/5 border-b border-[#3B2A10]/10 dark:border-[#D4B24C]/20 font-semibold text-[#3B2A10]/80 dark:text-[#FBF7EE]/80">
-                    <tr>
-                      <th className="p-3">Prenda</th>
-                      <th className="p-3">Categoría</th>
-                      <th className="p-3">Precio USD</th>
-                      <th className="p-3">Precio Bs. (BCV)</th>
-                      <th className="p-3">Costo & Margen</th>
-                      <th className="p-3">Stock</th>
-                      <th className="p-3 text-right">Acciones</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[#3B2A10]/5 dark:divide-[#D4B24C]/10">
-                    {products.map(p => {
-                      const effective = p.salePriceUsd || p.priceUsd;
-                      const margin = Math.round(((effective - p.costUsd) / effective) * 100);
-                      return (
-                        <tr key={p.id} className="hover:bg-[#3B2A10]/2 dark:hover:bg-white/2 transition-colors">
-                          <td className="p-3 flex items-center gap-2.5">
-                            <img
-                              src={p.image}
-                              alt=""
-                              className="w-10 h-12 object-cover rounded-md border border-[#3B2A10]/10 shrink-0"
-                            />
-                            <div>
-                              <p className="font-semibold line-clamp-1">{p.name}</p>
-                              <span className="font-mono text-[10px] text-[#3B2A10]/60 dark:text-[#FBF7EE]/60">{p.sku}</span>
-                            </div>
-                          </td>
-                          <td className="p-3 capitalize font-medium text-[#3B2A10]/70 dark:text-[#FBF7EE]/70">
-                            {p.category}
-                            {p.isBespoke && (
-                              <span className="block text-[10px] text-[#B8962E] font-bold">Por Encargo</span>
-                            )}
-                          </td>
-                          <td className="p-3 font-mono font-bold tabular-nums">
-                            {formatUsd(effective)}
-                            {p.salePriceUsd && (
-                              <span className="block text-[10px] text-[#3B2A10]/40 line-through">
-                                {formatUsd(p.priceUsd)}
-                              </span>
-                            )}
-                          </td>
-                          <td className="p-3 font-mono font-bold text-[#B8962E] dark:text-[#D4B24C] tabular-nums">
-                            {formatBs(calculateBs(effective, bcvRate))}
-                          </td>
-                          <td className="p-3 text-[11px] font-mono">
-                            <span className="text-[#3B2A10]/60 dark:text-[#FBF7EE]/60">Costo: ${p.costUsd}</span>
-                            <span className="block text-emerald-600 font-bold">{margin}% margen</span>
-                          </td>
-                          <td className="p-3">
-                            {p.isBespoke ? (
-                              <span className="text-[11px] text-[#B8962E] font-medium">Bespoke (A medida)</span>
-                            ) : p.stock <= 3 ? (
-                              <span className="px-2 py-0.5 bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 font-bold rounded text-[10px]">
-                                {p.stock} unid. (Bajo)
-                              </span>
-                            ) : (
-                              <span className="font-mono font-semibold">{p.stock} unid.</span>
-                            )}
-                          </td>
-                          <td className="p-3 text-right">
-                            <div className="flex items-center justify-end gap-1.5">
-                              <button
-                                onClick={() => openEditProductModal(p)}
-                                className="p-1.5 hover:bg-[#3B2A10]/10 dark:hover:bg-white/10 rounded text-[#3B2A10]/80 dark:text-[#FBF7EE]/80 cursor-pointer"
-                                title="Editar"
-                              >
-                                <Edit2 className="w-4 h-4 text-[#B8962E]" />
-                              </button>
-                              <button
-                                onClick={() => handleDeleteProduct(p.id)}
-                                className="p-1.5 hover:bg-red-50 dark:hover:bg-red-950/40 rounded text-red-600 cursor-pointer"
-                                title="Eliminar"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                {products.length === 0 ? (
+                  <div className="text-center py-12 px-4 space-y-3">
+                    <Package className="w-12 h-12 text-[#B8962E]/40 mx-auto" />
+                    <h4 className="font-display text-base font-bold">No hay productos en el catálogo</h4>
+                    <p className="text-xs text-[#3B2A10]/60 dark:text-[#FBF7EE]/60 max-w-sm mx-auto">
+                      Actualmente has quitado todos los productos. Puedes agregar prendas nuevas o restaurar el catálogo inicial de mayoristas.
+                    </p>
+                    <div className="flex items-center justify-center gap-3 pt-2">
+                      <button
+                        onClick={openNewProductModal}
+                        className="px-4 py-2 bg-[#B8962E] text-white text-xs font-bold rounded-lg cursor-pointer"
+                      >
+                        + Poner Nueva Prenda
+                      </button>
+                      {onResetCatalog && (
+                        <button
+                          onClick={onResetCatalog}
+                          className="px-4 py-2 border border-[#B8962E] text-[#B8962E] text-xs font-semibold rounded-lg cursor-pointer"
+                        >
+                          Restaurar Catálogo Base
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-[#3B2A10]/5 dark:bg-[#FBF7EE]/5 border-b border-[#3B2A10]/10 dark:border-[#D4B24C]/20 font-semibold text-[#3B2A10]/80 dark:text-[#FBF7EE]/80">
+                      <tr>
+                        <th className="p-3">Prenda & Foto</th>
+                        <th className="p-3">Categoría</th>
+                        <th className="p-3">Precio USD</th>
+                        <th className="p-3">Precio Bs. (BCV)</th>
+                        <th className="p-3">Mayorista / Dropshipping</th>
+                        <th className="p-3">Stock & Estado</th>
+                        <th className="p-3 text-right">Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#3B2A10]/5 dark:divide-[#D4B24C]/10">
+                      {products
+                        .filter(p => {
+                          const matchesSearch = !invSearch || 
+                            p.name.toLowerCase().includes(invSearch.toLowerCase()) ||
+                            p.sku.toLowerCase().includes(invSearch.toLowerCase()) ||
+                            p.category.toLowerCase().includes(invSearch.toLowerCase()) ||
+                            (p.tags && p.tags.some(t => t.toLowerCase().includes(invSearch.toLowerCase())));
+                          const matchesCat = invCategory === 'todos' || p.category === invCategory;
+                          const matchesStock = invStockFilter === 'all'
+                            ? true
+                            : invStockFilter === 'out_of_stock'
+                            ? p.stock === 0
+                            : invStockFilter === 'low_stock'
+                            ? (p.stock > 0 && p.stock <= 5)
+                            : p.stock > 5;
+                          return matchesSearch && matchesCat && matchesStock;
+                        })
+                        .map(p => {
+                          const effective = p.salePriceUsd || p.priceUsd;
+                          return (
+                            <tr key={p.id} className="hover:bg-[#3B2A10]/2 dark:hover:bg-white/2 transition-colors">
+                              <td className="p-3 flex items-center gap-3">
+                                <img
+                                  src={p.image}
+                                  alt={p.name}
+                                  className="w-11 h-13 object-cover rounded-md border border-[#3B2A10]/10 dark:border-[#D4B24C]/20 shrink-0 bg-white"
+                                  onError={(e) => {
+                                    (e.target as HTMLImageElement).src = './images/lenceria_intima_dama_1793412626756.jpg';
+                                  }}
+                                />
+                                <div className="space-y-0.5 max-w-[200px]">
+                                  <p className="font-bold line-clamp-1 text-[#3B2A10] dark:text-[#F4E7BD]">{p.name}</p>
+                                  <div className="flex items-center gap-2">
+                                    <span className="font-mono text-[10px] text-[#3B2A10]/60 dark:text-[#FBF7EE]/60">{p.sku}</span>
+                                    {p.isNegotiable && (
+                                      <span className="px-1.5 py-0.2 bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 text-[9px] font-bold rounded">
+                                        Negociable
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              </td>
+                              <td className="p-3 capitalize font-medium text-[#3B2A10]/70 dark:text-[#FBF7EE]/70">
+                                {p.category}
+                                {p.isBespoke && (
+                                  <span className="block text-[10px] text-[#B8962E] font-bold">Por Encargo</span>
+                                )}
+                              </td>
+                              <td className="p-3 font-mono font-bold tabular-nums">
+                                <span className="text-sm">{formatUsd(effective)}</span>
+                                {p.salePriceUsd && (
+                                  <span className="block text-[10px] text-[#3B2A10]/40 line-through">
+                                    {formatUsd(p.priceUsd)}
+                                  </span>
+                                )}
+                              </td>
+                              <td className="p-3 font-mono font-bold text-[#B8962E] dark:text-[#D4B24C] tabular-nums">
+                                {formatBs(calculateBs(effective, bcvRate))}
+                              </td>
+                              <td className="p-3 text-[11px] font-mono">
+                                <span className="text-emerald-700 dark:text-emerald-400 font-bold">
+                                  Mayor: ${p.wholesalePriceUsd || Math.round(effective * 0.65)}
+                                </span>
+                                <span className="block text-[10px] text-[#3B2A10]/60 dark:text-[#FBF7EE]/60">
+                                  Min: {p.minWholesaleQty || 3} uds (Costo: ${p.costUsd})
+                                </span>
+                              </td>
+                              <td className="p-3">
+                                <div className="flex items-center gap-2">
+                                  {p.stock === 0 ? (
+                                    <span className="px-2 py-0.5 bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300 font-bold rounded text-[10px]">
+                                      Agotado / Pausado
+                                    </span>
+                                  ) : p.stock <= 5 ? (
+                                    <span className="px-2 py-0.5 bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 font-bold rounded text-[10px]">
+                                      {p.stock} uds (Poco)
+                                    </span>
+                                  ) : (
+                                    <span className="font-mono font-bold text-emerald-700 dark:text-emerald-400 text-xs">
+                                      {p.stock} uds
+                                    </span>
+                                  )}
+                                  <button
+                                    type="button"
+                                    onClick={() => handleToggleStock(p)}
+                                    className="p-1 text-[#3B2A10]/50 hover:text-[#B8962E] cursor-pointer"
+                                    title={p.stock > 0 ? "Pausar / Marcar como Agotado" : "Reactivar stock (+25 uds)"}
+                                  >
+                                    {p.stock > 0 ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5 text-emerald-600" />}
+                                  </button>
+                                </div>
+                              </td>
+                              <td className="p-3 text-right">
+                                <div className="flex items-center justify-end gap-1.5">
+                                  <button
+                                    onClick={() => openEditProductModal(p)}
+                                    className="px-2.5 py-1.5 bg-[#3B2A10]/5 hover:bg-[#3B2A10]/10 dark:bg-white/5 dark:hover:bg-white/10 rounded-md text-[#3B2A10]/80 dark:text-[#FBF7EE]/80 cursor-pointer flex items-center gap-1 font-semibold text-[11px]"
+                                    title="Editar foto, precio o stock"
+                                  >
+                                    <Edit2 className="w-3.5 h-3.5 text-[#B8962E]" />
+                                    <span>Editar</span>
+                                  </button>
+                                  <button
+                                    onClick={() => setProductToDelete(p)}
+                                    className="px-2.5 py-1.5 bg-red-100 hover:bg-red-200 dark:bg-red-950/70 dark:hover:bg-red-900/90 text-red-700 dark:text-red-300 rounded-md cursor-pointer flex items-center gap-1 font-semibold text-[11px]"
+                                    title="Quitar esta prenda del catálogo"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                    <span>Quitar</span>
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                    </tbody>
+                  </table>
+                )}
               </div>
             </div>
           )}
@@ -1625,6 +1873,66 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             <div className="text-xs text-center">
               <p className="font-semibold">{selectedOrderVoucher.customerName}</p>
               <p className="font-mono text-xs">{selectedOrderVoucher.paymentMethod} · Ref: {selectedOrderVoucher.paymentRef || 'N/A'}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* CONFIRMACIÓN MODAL PARA QUITAR PRENDA */}
+      {productToDelete && (
+        <div className="fixed inset-0 z-70 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs">
+          <div className="bg-[#FBF7EE] dark:bg-[#1A1612] rounded-2xl p-5 max-w-md w-full border border-red-500/40 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-[#3B2A10]/10 dark:border-[#D4B24C]/20 pb-3">
+              <div className="flex items-center gap-2 text-red-600 dark:text-red-400 font-bold text-sm">
+                <AlertTriangle className="w-5 h-5 shrink-0" />
+                <span>¿Quitar Prenda del Catálogo?</span>
+              </div>
+              <button
+                onClick={() => setProductToDelete(null)}
+                className="p-1 rounded-full hover:bg-black/10 cursor-pointer text-[#3B2A10]/60 dark:text-[#FBF7EE]/60"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="flex items-center gap-3 p-3 bg-white dark:bg-[#12100E] rounded-xl border border-[#3B2A10]/10 dark:border-[#D4B24C]/20">
+              <img
+                src={productToDelete.image}
+                alt={productToDelete.name}
+                className="w-14 h-16 object-cover rounded-lg border border-[#3B2A10]/10 shrink-0 bg-white"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = './images/lenceria_intima_dama_1793412626756.jpg';
+                }}
+              />
+              <div className="text-xs space-y-0.5">
+                <p className="font-bold line-clamp-1 text-[#3B2A10] dark:text-[#F4E7BD]">{productToDelete.name}</p>
+                <p className="font-mono text-[10px] text-[#3B2A10]/60 dark:text-[#FBF7EE]/60">SKU: {productToDelete.sku} · Cat: {productToDelete.category}</p>
+                <p className="font-mono font-bold text-[#B8962E] dark:text-[#D4B24C]">
+                  {formatUsd(productToDelete.salePriceUsd || productToDelete.priceUsd)} · {formatBs(calculateBs(productToDelete.salePriceUsd || productToDelete.priceUsd, bcvRate))}
+                </p>
+              </div>
+            </div>
+
+            <p className="text-xs text-[#3B2A10]/70 dark:text-[#FBF7EE]/70">
+              ¿Confirmas que deseas retirar esta prenda? Dejará de mostrarse inmediatamente en la tienda web y en el catálogo para tus clientes.
+            </p>
+
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setProductToDelete(null)}
+                className="px-4 py-2 border border-[#3B2A10]/20 dark:border-[#D4B24C]/30 rounded-xl text-xs font-semibold hover:bg-[#3B2A10]/5 transition-colors cursor-pointer"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmDelete}
+                className="px-5 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold shadow-md transition-all flex items-center gap-1.5 cursor-pointer"
+              >
+                <Trash2 className="w-4 h-4" />
+                <span>Sí, Quitar del Catálogo</span>
+              </button>
             </div>
           </div>
         </div>

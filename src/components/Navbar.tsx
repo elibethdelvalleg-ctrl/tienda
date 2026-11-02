@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ShoppingBag, Heart, Search, ShieldCheck, Sun, Moon, Sparkles, MessageCircle, RefreshCw } from 'lucide-react';
 import { formatBs } from '../utils/formatters.ts';
+import { PWAInstallButton } from './PWAInstallButton.tsx';
 
 interface NavbarProps {
   bcvRate: number;
@@ -235,14 +236,18 @@ export const Navbar: React.FC<NavbarProps> = ({
             {isDarkMode ? <Sun className="w-5 h-5 text-[#D4B24C]" /> : <Moon className="w-5 h-5" />}
           </button>
 
-          {/* Admin Panel launcher */}
+          {/* PWA / Android Install Button */}
+          <PWAInstallButton variant="navbar" />
+
+          {/* Admin Panel launcher (Poner y quitar productos) */}
           <button
             onClick={onOpenAdmin}
-            className="p-2 text-[#3B2A10]/60 dark:text-[#FBF7EE]/60 hover:text-[#B8962E] hover:bg-[#3B2A10]/5 dark:hover:bg-[#FBF7EE]/5 rounded-lg transition-colors cursor-pointer border border-[#D4B24C]/30 flex items-center gap-1.5 text-xs font-semibold"
-            title="Panel de Administración"
+            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 bg-[#3B2A10] dark:bg-[#2A1F13] hover:bg-[#231809] dark:hover:bg-[#382B1B] text-[#D4B24C] border border-[#D4B24C]/60 hover:border-[#D4B24C] rounded-lg shadow-xs transition-all cursor-pointer text-xs font-bold"
+            title="Panel de Administración: Poner y Quitar Productos a voluntad"
           >
-            <ShieldCheck className="w-4 h-4 text-[#B8962E] dark:text-[#D4B24C]" />
-            <span className="hidden xl:inline">Admin</span>
+            <ShieldCheck className="w-4 h-4 text-[#D4B24C]" />
+            <span className="hidden sm:inline">Panel Admin</span>
+            <span className="sm:hidden text-[11px]">Admin</span>
           </button>
         </div>
       </div>

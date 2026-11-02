@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Heart, ShoppingBag, Eye, MessageCircle, Clock, Check } from 'lucide-react';
+import { Heart, ShoppingBag, Eye, MessageCircle, Clock, Check, Star } from 'lucide-react';
 import { Product } from '../types.ts';
 import { formatUsd, formatBs, calculateBs, buildWhatsAppOrderMessage, buildWhatsAppNegotiationMessage } from '../utils/formatters.ts';
+import { getProductReviews } from '../utils/reviewStorage.ts';
 
 interface ProductCardProps {
   product: Product;
@@ -159,6 +160,30 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           >
             {product.name}
           </h3>
+
+          {/* Star rating indicator */}
+          {(() => {
+            const cardReviews = getProductReviews(product);
+            const cardAvg = cardReviews.length > 0 
+              ? (cardReviews.reduce((acc, r) => acc + r.rating, 0) / cardReviews.length).toFixed(1)
+              : '5.0';
+            return (
+              <div 
+                onClick={() => onQuickView(product)}
+                className="flex items-center gap-1.5 mt-1 cursor-pointer group-hover:opacity-90"
+              >
+                <div className="flex items-center gap-0.5">
+                  <Star className="w-3.5 h-3.5 fill-[#D4B24C] text-[#D4B24C]" />
+                </div>
+                <span className="text-[11px] font-bold text-[#8B6F38] dark:text-[#D4B24C]">
+                  {cardAvg}
+                </span>
+                <span className="text-[10px] text-stone-400">
+                  ({cardReviews.length})
+                </span>
+              </div>
+            );
+          })()}
 
           <p className="text-xs text-[#3B2A10]/70 dark:text-[#FBF7EE]/70 line-clamp-2 mt-1 leading-relaxed">
             {product.description}

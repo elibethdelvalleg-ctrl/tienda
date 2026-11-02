@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { Sliders } from 'lucide-react';
 import { Navbar } from './components/Navbar.tsx';
 import { HeroBanner } from './components/HeroBanner.tsx';
 import { ProductGrid } from './components/ProductGrid.tsx';
@@ -17,6 +18,8 @@ import { FavoritesModal } from './components/FavoritesModal.tsx';
 import { AdminDashboard } from './components/AdminDashboard.tsx';
 import { AIAssistantBot } from './components/AIAssistantBot.tsx';
 import { Footer } from './components/Footer.tsx';
+import { PWAInstallButton } from './components/PWAInstallButton.tsx';
+import { OfflineIndicator } from './components/OfflineIndicator.tsx';
 import { Product, CartItem, Order, StoreConfig } from './types.ts';
 import { initialProducts, initialStoreConfig } from './data/initialCatalog.ts';
 
@@ -26,7 +29,7 @@ export default function App() {
       const saved = localStorage.getItem('edv_products');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed)) return parsed;
       }
     } catch (e) {
       console.warn("Could not load products from localStorage", e);
@@ -166,7 +169,11 @@ export default function App() {
 
         if (prodRes && prodRes.ok) {
           const prods = await prodRes.json();
-          if (Array.isArray(prods) && prods.length > 0) setProducts(prods);
+          const localSaved = localStorage.getItem('edv_products');
+          // Only populate from server if admin hasn't customized products locally
+          if (!localSaved && Array.isArray(prods) && prods.length > 0) {
+            setProducts(prods);
+          }
         }
 
         if (confRes && confRes.ok) {
@@ -339,9 +346,19 @@ export default function App() {
 
   const totalCartUnits = cartItems.reduce((acc, i) => acc + i.quantity, 0);
 
+  const handleResetCatalog = () => {
+    if (window.confirm("¿Deseas restablecer el catálogo de fábrica? Esto volverá a cargar las prendas iniciales de mayoristas venezolanos con sus precios y fotos.")) {
+      setProducts(initialProducts);
+      localStorage.setItem('edv_products', JSON.stringify(initialProducts));
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-[#FBF7EE] dark:bg-[#12100E] text-[#3B2A10] dark:text-[#FBF7EE] transition-colors duration-300">
       
+      {/* Banner de instalación en Android / PWA para usuarios móviles */}
+      <PWAInstallButton variant="banner" />
+
       {/* Navbar with brand identity, lion logo & live BCV rate */}
       <Navbar
         bcvRate={bcvRate}
@@ -494,6 +511,7 @@ export default function App() {
         onUpdateProducts={(prods) => setProducts(prods)}
         onUpdateOrders={(ords) => setOrders(ords)}
         onUpdateConfig={(cfg) => setConfig(cfg)}
+        onResetCatalog={handleResetCatalog}
       />
 
       {/* Bot Asesor de Estilo y Gestor de Pedidos WhatsApp (0422-0217446) */}
@@ -510,6 +528,23 @@ export default function App() {
         onOpenCart={() => setCartOpen(true)}
         onSelectProduct={(p) => setQuickViewProduct(p)}
       />
+
+      {/* Botón Flotante de Acceso Rápido al Panel Admin (Poner y quitar productos) */}
+      <button
+        onClick={() => setAdminOpen(true)}
+        className="fixed bottom-6 left-5 z-30 flex items-center gap-2 px-3.5 py-2.5 bg-[#3B2A10]/95 hover:bg-[#231809] text-[#D4B24C] hover:text-white border border-[#D4B24C]/60 hover:border-[#D4B24C] rounded-full shadow-lg backdrop-blur-md text-xs font-bold transition-all hover:scale-105 active:scale-95 cursor-pointer"
+        title="Panel Admin: Poner y Quitar Productos a voluntad"
+      >
+        <Sliders className="w-3.5 h-3.5 text-[#D4B24C]" />
+        <span className="hidden sm:inline">Poner / Quitar Prendas</span>
+        <span className="sm:hidden">Admin</span>
+      </button>
+
+      {/* Botón flotante para instalar App en Android en móviles */}
+      <PWAInstallButton variant="floating" />
+
+      {/* Indicador de conexión / offline */}
+      <OfflineIndicator />
 
     </div>
   );

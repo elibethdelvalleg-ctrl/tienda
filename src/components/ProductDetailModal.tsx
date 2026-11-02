@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { X, Heart, ShoppingBag, MessageCircle, ShieldCheck, Truck, Ruler, Check, Clock, Sparkles } from 'lucide-react';
+import { X, Heart, ShoppingBag, MessageCircle, ShieldCheck, Truck, Ruler, Check, Clock, Sparkles, Star } from 'lucide-react';
 import { Product } from '../types.ts';
 import { formatUsd, formatBs, calculateBs, buildWhatsAppOrderMessage, buildWhatsAppNegotiationMessage } from '../utils/formatters.ts';
+import { ProductReviewsSection } from './ProductReviewsSection.tsx';
+import { getProductReviews } from '../utils/reviewStorage.ts';
 
 interface ProductDetailModalProps {
   product: Product | null;
@@ -71,7 +73,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
       <div 
-        className="relative w-full max-w-4xl bg-[#FBF7EE] dark:bg-[#1A1612] rounded-2xl shadow-2xl border border-[#3B2A10]/15 dark:border-[#D4B24C]/30 overflow-hidden my-8"
+        className="relative w-full max-w-4xl max-h-[92vh] overflow-y-auto bg-[#FBF7EE] dark:bg-[#1A1612] rounded-2xl shadow-2xl border border-[#3B2A10]/15 dark:border-[#D4B24C]/30 my-8 scroll-smooth"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close Button */}
@@ -156,6 +158,44 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
               <h2 className="font-display text-2xl sm:text-3xl font-bold text-[#3B2A10] dark:text-[#FBF7EE] mt-2">
                 {product.name}
               </h2>
+
+              {/* Star Rating & Reviews anchor */}
+              {(() => {
+                const modalReviews = getProductReviews(product);
+                const avg = modalReviews.length > 0
+                  ? (modalReviews.reduce((acc, r) => acc + r.rating, 0) / modalReviews.length).toFixed(1)
+                  : '5.0';
+                return (
+                  <div className="flex items-center gap-2 mt-2 flex-wrap">
+                    <div className="flex items-center gap-0.5">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <Star
+                          key={star}
+                          className={`w-4 h-4 ${
+                            star <= Math.round(Number(avg))
+                              ? 'fill-[#D4B24C] text-[#D4B24C]'
+                              : 'text-stone-300 dark:text-stone-600'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const el = document.getElementById('product-reviews-section');
+                        if (el) el.scrollIntoView({ behavior: 'smooth' });
+                      }}
+                      className="text-xs font-bold text-[#8B6F38] dark:text-[#D4B24C] hover:underline cursor-pointer"
+                    >
+                      {avg} ({modalReviews.length} {modalReviews.length === 1 ? 'opinión' : 'opiniones'})
+                    </button>
+                    <span className="text-xs text-stone-300 dark:text-stone-700">·</span>
+                    <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-300 dark:border-emerald-800">
+                      ✓ Clientes Satisfechos
+                    </span>
+                  </div>
+                );
+              })()}
 
               {/* Price Banner with Wholesale & Dropshipping Info */}
               <div className="mt-3 p-3.5 bg-white dark:bg-[#12100E] rounded-xl border border-[#3B2A10]/10 dark:border-[#D4B24C]/25 space-y-2">
@@ -407,6 +447,11 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
 
           </div>
 
+        </div>
+
+        {/* Sección Completa de Reseñas, Calificaciones con Estrellas y Formulario */}
+        <div id="product-reviews-section" className="px-6 sm:px-8 pb-8">
+          <ProductReviewsSection product={product} />
         </div>
       </div>
     </div>
