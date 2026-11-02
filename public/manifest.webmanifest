@@ -1,0 +1,18 @@
+{
+  "name": "ELIBETH DEL VALLE STORE",
+  "short_name": "Elibeth Store",
+  "description": "Boutique de moda exclusiva en Venezuela: Mujer, Hombre, Niños y Catálogo por Encargo",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FBF7EE",
+  "theme_color": "#3B2A10",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/assets/aistudio/logoemprendimientoropa_9eefadce.jpeg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ]
+}
