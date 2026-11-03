@@ -92,7 +92,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
           <span className="hidden sm:inline text-white/40">|</span>
           <span className="hidden lg:inline text-amber-200/90 font-medium">
-            Precios referenciales · ¡Negociables por volumen o dropshipping!
+            Precios referenciales · ¡Negociables por volumen o compras al mayor!
           </span>
           <span className="hidden sm:inline text-white/40">|</span>
           <button
@@ -140,7 +140,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
           <div className="flex flex-col">
             <span className="font-display text-lg sm:text-xl font-bold tracking-tight text-[#3B2A10] dark:text-[#F4E7BD] leading-tight whitespace-nowrap">
-              ELIBETH DEL VALLE
+              ELIBETH STORE
             </span>
             <span className="text-[10px] tracking-widest text-[#B8962E] dark:text-[#D4B24C] font-semibold uppercase whitespace-nowrap">
               El renacer de mi fuerza

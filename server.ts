@@ -6,6 +6,9 @@ import { GoogleGenAI, Type } from '@google/genai';
 
 dotenv.config();
 
+// Ensure HMR is disabled in container dev server to avoid broken WebSocket connections
+process.env.DISABLE_HMR = 'true';
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -17,7 +20,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Initial Store Configuration
 let storeConfig = {
-  storeName: "ELIBETH DEL VALLE STORE",
+  storeName: "ELIBETH STORE",
   slogan: "El renacer de mi fuerza",
   whatsappNumber: "584220217446",
   whatsappDisplay: "+58 (422) 021-7446",
@@ -87,7 +90,7 @@ interface ServerProduct {
   pricingNotice?: string;
 }
 
-// Seed initial products with authentic Venezuelan local wholesaler & dropshipping catalog
+// Seed initial products with authentic Venezuelan local wholesaler & volume sales catalog
 let products: ServerProduct[] = [
   {
     id: "prod-intima-1",
@@ -99,9 +102,9 @@ let products: ServerProduct[] = [
     salePriceUsd: 12.5,
     costUsd: 6.0,
     sku: "MAY-INT-001",
-    description: "Conjunto de 2 piezas (bralette con copa suave y panty hilo/semicachetero) en encaje de alta densidad con detalles dorado champaña. Producto estrella de alta rotación para dropshipping.",
-    image: "/src/assets/images/lenceria_intima_dama_1793412626756.jpg",
-    secondaryImage: "/src/assets/images/lenceria_intima_dama_1793412626756.jpg",
+    description: "Conjunto de 2 piezas (bralette con copa suave y panty hilo/semicachetero) en encaje de alta densidad con detalles dorado champaña. Producto estrella de alta rotación para tiendas y revendedores.",
+    image: "./images/lenceria_intima_dama_1793412626756.jpg",
+    secondaryImage: "./images/lenceria_intima_dama_1793412626756.jpg",
     sizes: ["32B (S)", "34B (M)", "36B (L)", "38C (XL)"],
     colors: ["Vino Tinto Dorado", "Negro Ónix", "Palo Rosa", "Blanco Marfil"],
     stock: 45,
@@ -125,15 +128,15 @@ let products: ServerProduct[] = [
     costUsd: 10.5,
     sku: "MAY-INT-002",
     description: "Body moldeador con compresión abdominal de alta resistencia, tecnología sin costuras que no se marca bajo vestidos o pantalones. Efecto reloj de arena.",
-    image: "/src/assets/images/lenceria_intima_dama_1793412626756.jpg",
-    secondaryImage: "/src/assets/images/lenceria_intima_dama_1793412626756.jpg",
+    image: "./images/lenceria_intima_dama_1793412626756.jpg",
+    secondaryImage: "./images/lenceria_intima_dama_1793412626756.jpg",
     sizes: ["S", "M", "L", "XL", "XXL"],
     colors: ["Piel Beige", "Negro", "Café Mocca"],
     stock: 30,
     isBespoke: false,
     deliveryDays: "Despacho 24-48h",
     featured: true,
-    tags: ["Fajas Reductoras", "Alta Demanda", "Dropshipping"],
+    tags: ["Fajas Reductoras", "Alta Demanda", "Ventas al Mayor"],
     isNegotiable: true,
     minWholesaleQty: 3,
     supplierOrigin: "Distribuidores directos San Cristóbal / Cúcuta",
@@ -150,8 +153,8 @@ let products: ServerProduct[] = [
     costUsd: 13.5,
     sku: "MAY-PAN-001",
     description: "Jeans de mezclilla stretch premium con pretina ancha faja levanta cola, confección con pinzas traseras moldeadoras y costuras reforzadas. El pantalón más pedido en Venezuela.",
-    image: "/src/assets/images/jeans_colombiano_dama_1793412627102.jpg",
-    secondaryImage: "/src/assets/images/jeans_colombiano_dama_1793412627102.jpg",
+    image: "./images/jeans_colombiano_dama_1793412627102.jpg",
+    secondaryImage: "./images/jeans_colombiano_dama_1793412627102.jpg",
     sizes: ["Talla 4", "Talla 6", "Talla 8", "Talla 10", "Talla 12", "Talla 14"],
     colors: ["Azul Índigo Clásico", "Azul Hielo Claro", "Negro Deslavado"],
     stock: 38,
@@ -175,8 +178,8 @@ let products: ServerProduct[] = [
     costUsd: 10.0,
     sku: "MAY-PAN-002",
     description: "Pantalón urbano con 6 bolsillos utilitarios funcionales, elástico ajustable en cintura y bota jogger. Gabardina suave de alto rendimiento.",
-    image: "/src/assets/images/jeans_colombiano_dama_1793412627102.jpg",
-    secondaryImage: "/src/assets/images/ropa_deportiva_caballero_1793412628454.jpg",
+    image: "./images/jeans_colombiano_dama_1793412627102.jpg",
+    secondaryImage: "./images/ropa_deportiva_caballero_1793412628454.jpg",
     sizes: ["S (28-30)", "M (32)", "L (34)", "XL (36-38)"],
     colors: ["Negro Táctico", "Beige Arena", "Verde Militar", "Gris Plomo"],
     stock: 28,
@@ -200,8 +203,8 @@ let products: ServerProduct[] = [
     costUsd: 8.0,
     sku: "MAY-DEP-001",
     description: "Conjunto fitness fabricado en Suplex grueso antitransparencia, pretina alta con control de abdomen que no se baja al entrenar y top con almohadillas removibles.",
-    image: "/src/assets/images/conjunto_deportivo_suplex_1793412627777.jpg",
-    secondaryImage: "/src/assets/images/conjunto_deportivo_suplex_1793412627777.jpg",
+    image: "./images/conjunto_deportivo_suplex_1793412627777.jpg",
+    secondaryImage: "./images/conjunto_deportivo_suplex_1793412627777.jpg",
     sizes: ["S/M (Strech)", "L/XL (Strech)"],
     colors: ["Verde Esmeralda Gym", "Negro Matte", "Azul Eléctrico", "Vinotinto"],
     stock: 50,
@@ -225,8 +228,8 @@ let products: ServerProduct[] = [
     costUsd: 4.8,
     sku: "MAY-DEP-002",
     description: "Franela técnica deportiva con tecnología de secado ultra rápido, tejido liviano microperforado en espalda y laterales. Perfecta para gimnasio, running y clima caluroso de Venezuela.",
-    image: "/src/assets/images/ropa_deportiva_caballero_1793412628454.jpg",
-    secondaryImage: "/src/assets/images/ropa_deportiva_caballero_1793412628454.jpg",
+    image: "./images/ropa_deportiva_caballero_1793412628454.jpg",
+    secondaryImage: "./images/ropa_deportiva_caballero_1793412628454.jpg",
     sizes: ["S", "M", "L", "XL", "XXL"],
     colors: ["Gris Jaspeado", "Negro", "Azul Rey", "Blanco"],
     stock: 60,
@@ -250,15 +253,15 @@ let products: ServerProduct[] = [
     costUsd: 6.5,
     sku: "MAY-HOM-001",
     description: "Bermuda deportiva con bolsillo secreto para celular en la licra interna, toallero posterior y bolsillos laterales con cierre sellado. Comodidad absoluta.",
-    image: "/src/assets/images/ropa_deportiva_caballero_1793412628454.jpg",
-    secondaryImage: "/src/assets/images/ropa_deportiva_caballero_1793412628454.jpg",
+    image: "./images/ropa_deportiva_caballero_1793412628454.jpg",
+    secondaryImage: "./images/ropa_deportiva_caballero_1793412628454.jpg",
     sizes: ["M (30-32)", "L (34)", "XL (36)", "XXL (38)"],
     colors: ["Negro con Licra Gris", "Gris Oscuro", "Verde Militar"],
     stock: 35,
     isBespoke: false,
     deliveryDays: "Inmediato (24-48h)",
     featured: false,
-    tags: ["Caballeros", "Short Gym", "Dropshipping"],
+    tags: ["Caballeros", "Short Gym", "Ventas al Mayor"],
     isNegotiable: true,
     minWholesaleQty: 3,
     supplierOrigin: "Mayoristas Importación Directa Panamá",
@@ -275,8 +278,8 @@ let products: ServerProduct[] = [
     costUsd: 4.5,
     sku: "MAY-HOM-002",
     description: "Caja de 3 boxers masculinos en algodón peruano suave con 5% de spandex para ajuste anatómico perfecto. Elástico bordado que no maltrata la piel.",
-    image: "/src/assets/images/ropa_deportiva_caballero_1793412628454.jpg",
-    secondaryImage: "/src/assets/images/ropa_deportiva_caballero_1793412628454.jpg",
+    image: "./images/ropa_deportiva_caballero_1793412628454.jpg",
+    secondaryImage: "./images/ropa_deportiva_caballero_1793412628454.jpg",
     sizes: ["S", "M", "L", "XL"],
     colors: ["Surtido (Negro, Gris, Azul Marino)"],
     stock: 55,
@@ -300,8 +303,8 @@ let products: ServerProduct[] = [
     costUsd: 32.0,
     sku: "EDV-MUJ-001",
     description: "Vestido de noche confeccionado en satén de seda color champaña dorado con pliegues artesanales en el busto y abertura lateral de alta costura.",
-    image: "/src/assets/images/hero_luxury_fashion_1793411521589.jpg",
-    secondaryImage: "/src/assets/images/collection_woman_gold_1793411522165.jpg",
+    image: "./images/hero_luxury_fashion_1793411521589.jpg",
+    secondaryImage: "./images/collection_woman_gold_1793411522165.jpg",
     sizes: ["XS", "S", "M", "L"],
     colors: ["Dorado Champaña", "Esmeralda", "Negro"],
     stock: 14,
@@ -324,9 +327,9 @@ let products: ServerProduct[] = [
     salePriceUsd: null,
     costUsd: 40.0,
     sku: "EDV-ENC-001",
-    description: "Servicio de confección personalizada y dropshipping de prendas exclusivas de diseñador. Abonas el 50% de anticipo en Bolívares o Divisas y el saldo a la entrega.",
-    image: "/src/assets/images/collection_por_encargo_1793411524038.jpg",
-    secondaryImage: "/src/assets/images/collection_por_encargo_1793411524038.jpg",
+    description: "Servicio de confección personalizada y pedidos por encargo de prendas exclusivas de diseñador. Abonas el 50% de anticipo en Bolívares o Divisas y el saldo a la entrega.",
+    image: "./images/collection_por_encargo_1793411524038.jpg",
+    secondaryImage: "./images/collection_por_encargo_1793411524038.jpg",
     sizes: ["A Medida Exacta", "S", "M", "L", "XL"],
     colors: ["Según requerimiento del cliente"],
     stock: 10,
@@ -585,7 +588,7 @@ app.post('/api/products', (req, res) => {
     depositRequiredPercent: req.body.depositRequiredPercent ? Number(req.body.depositRequiredPercent) : 50,
     deliveryDays: req.body.deliveryDays || "Inmediato (24-48h)",
     featured: Boolean(req.body.featured),
-    tags: Array.isArray(req.body.tags) ? req.body.tags : ["Mayorista", "Dropshipping"],
+    tags: Array.isArray(req.body.tags) ? req.body.tags : ["Mayorista", "Top Ventas"],
     isNegotiable: req.body.isNegotiable !== undefined ? Boolean(req.body.isNegotiable) : true,
     minWholesaleQty: Number(req.body.minWholesaleQty) || 3,
     supplierOrigin: req.body.supplierOrigin || "Mayoristas Galpones El Cementerio / La Hoyada Caracas",
@@ -718,7 +721,7 @@ app.post('/api/trends/analyze', async (req, res) => {
       return res.json({
         source: "cached_intelligence",
         timestamp: new Date().toISOString(),
-        summary: "Radar de inteligencia comercial para Venezuela enfocado en dropshipping y reventa de mayoristas: ropa íntima de damas, jeans levanta cola, franelas deportivas y prendas para caballero.",
+        summary: "Radar de inteligencia comercial para Venezuela enfocado en ventas y reventa de mayoristas: ropa íntima de damas, jeans levanta cola, franelas deportivas y prendas para caballero.",
         insights: [
           {
             title: "Conjuntos de Lencería Encaje Francés & Bralette Realce",
@@ -727,14 +730,14 @@ app.post('/api/trends/analyze', async (req, res) => {
             demandLevel: "Muy Alta",
             targetSeason: "Todo el año / Ventas continuas",
             targetAudience: "Damas 18-40 años en Caracas, Valencia y Maracaibo",
-            whyTrending: "La ropa íntima femenina es el producto de mayor rotación y menor volumen para envíos por MRW/Zoom. Margen de dropshipping supera el 65%.",
+            whyTrending: "La ropa íntima femenina es el producto de mayor rotación y menor volumen para envíos por MRW/Zoom. Margen de ganancia supera el 65%.",
             targetPurchasePriceUsd: 6.0,
             suggestedRetailPriceUsd: 14.0,
             estimatedMarginPercent: 57,
             recommendedStockUnits: 50,
             sourcingLocations: "Galpones mayoristas de El Cementerio y La Hoyada en Caracas, o importación directa Colombia.",
             actionType: "catalog_add",
-            badge: "Top Dropshipping"
+            badge: "Top Ventas"
           },
           {
             title: "Jeans Colombianos Levanta Cola con Pretina Ancha",
@@ -788,19 +791,19 @@ app.post('/api/trends/analyze', async (req, res) => {
       });
     }
 
-    const promptText = `Actúa como el consultor principal de moda, mayoristas y dropshipping para el mercado local venezolano en la tienda 'ELIBETH DEL VALLE STORE' (eslogan: 'El renacer de mi fuerza').
+    const promptText = `Actúa como el consultor principal de moda, mayoristas y ventas comerciales para el mercado local venezolano en la tienda 'ELIBETH DEL VALLE STORE' (eslogan: 'El renacer de mi fuerza').
 Analiza las prendas más demandadas y lucrativas en Venezuela para la categoría "${category}" y temporada "${season}".
 Enfócate en:
 1. Ropa íntima de dama (lencería, bralettes, fajas colombianas, panties al mayor).
 2. Pantalones (jeans levanta cola, joggers, cargos).
 3. Ropa y franelas deportivas de mayoristas (dry-fit, conjuntos suplex de dama y hombre).
 4. Ropa para caballeros (shorts 2 en 1, franelas de gym, boxers).
-5. Modelo de Dropshipping: precios de compra al mayorista vs. precio de venta referencial con márgenes y precios negociables por volumen.
+5. Precios de compra al mayorista vs. precio de venta referencial con márgenes y precios negociables por volumen.
 6. Proveedores reales en Venezuela (galpones en El Cementerio, La Hoyada, La Candelaria, San Cristóbal, o importación directa vía Panamá).
 
 Devuelve EXACTAMENTE un JSON con esta estructura:
 {
-  "summary": "Resumen ejecutivo del momento comercial y oportunidades de dropshipping en Venezuela",
+  "summary": "Resumen ejecutivo del momento comercial y oportunidades de ventas al mayor en Venezuela",
   "insights": [
     {
       "title": "Nombre de la prenda en tendencia",
@@ -814,7 +817,7 @@ Devuelve EXACTAMENTE un JSON con esta estructura:
       "suggestedRetailPriceUsd": precio de venta al detal referencial en USD número,
       "estimatedMarginPercent": margen estimado en % número,
       "recommendedStockUnits": cantidad sugerida por pedido,
-      "badge": "etiqueta como 'Top Dropshipping' o 'Alta Rotación'"
+      "badge": "etiqueta como 'Top Ventas' o 'Alta Rotación'"
     }
   ]
 }`;
@@ -918,7 +921,7 @@ app.post('/api/chat/assistant', async (req, res) => {
     let quickReplies = [
       "👗 Ver lencería en tendencia",
       "👖 Jeans Levanta Cola",
-      "💼 Precios al mayor / Dropshipping",
+      "💼 Precios al mayor / Por volumen",
       "📲 Enviar Pedido a WhatsApp"
     ];
 
@@ -947,7 +950,7 @@ app.post('/api/chat/assistant', async (req, res) => {
     } else if (text.includes("jean") || text.includes("pantalon") || text.includes("levanta cola") || text.includes("colombian")) {
       const jeans = products.filter(p => p.category === 'pantalones');
       suggestedIds = jeans.slice(0, 3).map(p => p.id);
-      reply = `¡Los Jeans Levanta Cola son nuestra especialidad estrella! Diseñados con pretina ancha moldeadora de 3 a 5 botones y mezclilla con elastano que estiliza la figura femenina de forma inmediata.\n\n📐 **Tallas:** 6, 8, 10, 12, 14, 16.\n💵 **Precio:** $${jeans[0]?.priceUsd || 28} USD (~Bs. ${((jeans[0]?.priceUsd || 28) * currentBcv).toLocaleString('es-VE', { minimumFractionDigits: 2 })} Tasa BCV).\n🤝 **Dropshipping / Mayor:** Margen de reventa superior al 50%.`;
+      reply = `¡Los Jeans Levanta Cola son nuestra especialidad estrella! Diseñados con pretina ancha moldeadora de 3 a 5 botones y mezclilla con elastano que estiliza la figura femenina de forma inmediata.\n\n📐 **Tallas:** 6, 8, 10, 12, 14, 16.\n💵 **Precio:** $${jeans[0]?.priceUsd || 28} USD (~Bs. ${((jeans[0]?.priceUsd || 28) * currentBcv).toLocaleString('es-VE', { minimumFractionDigits: 2 })} Tasa BCV).\n🤝 **Mayoristas / Por volumen:** Margen de reventa superior al 50%.`;
       quickReplies = ["Guía de medidas de Jeans", "Jeans color oscuro", "Armar pedido por WhatsApp", "Ver catálogo completo"];
     } else if (text.includes("deport") || text.includes("suplex") || text.includes("licra") || text.includes("gym")) {
       const sports = products.filter(p => p.category === 'deportivo');
@@ -962,11 +965,11 @@ app.post('/api/chat/assistant', async (req, res) => {
     } else if (text.includes("bcv") || text.includes("tasa") || text.includes("dolar") || text.includes("bolivar") || text.includes("bs")) {
       reply = `En **ELIBETH DEL VALLE STORE** calculamos todos los pagos estrictamente a la **tasa oficial del Banco Central de Venezuela (BCV)** del día:\n\n🇻🇪 **Tasa Oficial BCV:** Bs. **${currentBcv}** por USD.\n🔄 Se actualiza de forma automática en tiempo real.\n\nAceptamos **Pago Móvil (0422-021-7446)**, transferencias bancarias nacionales, Zelle y Binance USDT.`;
       quickReplies = ["Hacer un cálculo en Bs.", "Ver formas de pago", "Ver productos", "Hacer pedido por WhatsApp"];
-    } else if (text.includes("mayor") || text.includes("dropshipping") || text.includes("emprend") || text.includes("negocia")) {
-      reply = `💼 **¡Impulsa tu negocio con nuestro programa de Dropshipping y Reventa en Venezuela!**\n\n1. **Precios Negociables:** Ofrecemos descuentos especiales a partir de media docena (6 prendas surtidas) o por bulto cerrado.\n2. **Sin inventario previo:** Puedes publicar nuestras fotos de catálogo en tus redes o estados de WhatsApp y despachamos directamente a tu cliente por MRW, Zoom o Tealca.\n3. **Márgenes del 50% al 70%:** En lencería íntima, jeans levanta cola y ropa deportiva.\n\nEscríbenos al WhatsApp directo **0422-0217446** para recibir el listado exclusivo de mayoristas.`;
+    } else if (text.includes("mayor") || text.includes("reventa") || text.includes("emprend") || text.includes("negocia") || text.includes("volumen")) {
+      reply = `💼 **¡Impulsa tu negocio con nuestras compras al Mayor y Reventa en Venezuela!**\n\n1. **Precios Negociables:** Ofrecemos descuentos especiales a partir de media docena (6 prendas surtidas) o por bulto cerrado.\n2. **Envíos Asegurados:** Despachamos directo a tu agencia por MRW, Zoom o Tealca.\n3. **Márgenes del 50% al 70%:** En lencería íntima, jeans levanta cola y ropa deportiva.\n\nEscríbenos al WhatsApp directo **0422-0217446** para recibir el listado exclusivo de mayoristas.`;
       quickReplies = ["Contactar al 04220217446", "Ver lencería al mayor", "Ver jeans al mayor", "Condiciones de envío nacional"];
     } else {
-      reply = `¡Hola! Soy tu **Asesora Virtual de Estilo y Pedidos** en **ELIBETH DEL VALLE STORE** 🦁✨ (*El renacer de mi fuerza*).\n\nEstoy aquí para:\n👗 **Recomendarte la prenda ideal** (lencería de encaje, jeans colombianos levanta cola, suplex deportivo o ropa para caballeros).\n💵 **Calcular precios en Bolívares** según la tasa oficial BCV de hoy (**Bs. ${currentBcv} / $**).\n💼 **Guiarte en compras al mayor o dropshipping** con precios negociables.\n📲 **Gestionar tu pedido** y enviarlo directamente a nuestro WhatsApp oficial **0422-0217446**.\n\n¿En qué te puedo asesorar hoy?`;
+      reply = `¡Hola! Soy tu **Asesora Virtual de Estilo y Pedidos** en **ELIBETH DEL VALLE STORE** 🦁✨ (*El renacer de mi fuerza*).\n\nEstoy aquí para:\n👗 **Recomendarte la prenda ideal** (lencería de encaje, jeans colombianos levanta cola, suplex deportivo o ropa para caballeros).\n💵 **Calcular precios en Bolívares** según la tasa oficial BCV de hoy (**Bs. ${currentBcv} / $**).\n💼 **Guiarte en compras al mayor y pedidos por volumen** con precios negociables.\n📲 **Gestionar tu pedido** y enviarlo directamente a nuestro WhatsApp oficial **0422-0217446**.\n\n¿En qué te puedo asesorar hoy?`;
       suggestedIds = products.slice(0, 3).map(p => p.id);
     }
 
@@ -1007,7 +1010,7 @@ Tu misión:
 1. Trato cercano, elegante, empoderado y muy venezolano ("¡Hola bella/o!", "excelente prenda", "horma espectacular", "tela fresca").
 2. Recomienda prendas específicas del catálogo usando sus IDs exactos.
 3. Asesora en tallas, telas (encaje francés, mezclilla colombiana levanta cola, licra suplex sin transparencia, dry-fit).
-4. Explica ventajas de Dropshipping y compras al mayor (precios referenciales negociables por docena o bulto).
+4. Explica ventajas de compras al mayor, precios por volumen y reventa (precios referenciales negociables por docena o bulto).
 5. Si el usuario desea comprar, armar o finalizar su pedido, resume los productos elegidos, calcula los totales en USD y en Bs. (Tasa BCV ${currentBcv}), e indica que el pedido se gestionará por WhatsApp al 0422-0217446.
 
 Debes responder OBLIGATORIAMENTE en formato JSON con las siguientes claves:
@@ -1129,7 +1132,10 @@ async function startServer() {
   } else {
     const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({
-      server: { middlewareMode: true },
+      server: {
+        middlewareMode: true,
+        hmr: false
+      },
       appType: 'spa'
     });
     app.use(vite.middlewares);

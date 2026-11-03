@@ -1,5 +1,5 @@
 import React from 'react';
-import { MessageCircle, ShieldCheck, Truck, CreditCard, Sparkles } from 'lucide-react';
+import { MessageCircle, ShieldCheck, Truck, CreditCard, Sparkles, Code2, Phone, Mail } from 'lucide-react';
 import { formatBs } from '../utils/formatters.ts';
 
 interface FooterProps {
@@ -36,7 +36,7 @@ export const Footer: React.FC<FooterProps> = ({
               </div>
               <div>
                 <h3 className="font-display text-lg font-bold tracking-tight text-[#FBF7EE]">
-                  ELIBETH DEL VALLE STORE
+                  ELIBETH STORE
                 </h3>
                 <p className="text-xs text-[#D4B24C] font-semibold uppercase tracking-widest">
                   El renacer de mi fuerza
@@ -143,9 +143,44 @@ export const Footer: React.FC<FooterProps> = ({
           </div>
         </div>
 
-        {/* Bottom copyright */}
-        <div className="pt-4 text-center text-xs text-[#FBF7EE]/40">
-          <p>© {new Date().getFullYear()} ELIBETH DEL VALLE STORE. Todos los derechos reservados. "El renacer de mi fuerza".</p>
+        {/* Bottom copyright & Programmer Signature */}
+        <div className="pt-6 border-t border-white/10 flex flex-col lg:flex-row items-center justify-between gap-4 text-xs text-[#FBF7EE]/60">
+          <div className="text-center lg:text-left space-y-0.5">
+            <p>© 2026 ELIBETH STORE. Todos los derechos reservados. "El renacer de mi fuerza".</p>
+            <p className="text-[11px] text-[#FBF7EE]/40">Boutique & Ventas al Mayor · Caracas, Venezuela</p>
+          </div>
+
+          {/* Firma de Programador: Smith Business Solutions 2026 */}
+          <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 bg-black/40 px-4 py-2.5 rounded-2xl border border-[#D4B24C]/30 text-[11px] text-center sm:text-left shadow-inner">
+            <div className="flex items-center gap-1.5 text-[#F4E7BD] font-semibold">
+              <Code2 className="w-3.5 h-3.5 text-[#D4B24C] shrink-0" />
+              <span>Firma de Programador: <strong className="text-[#D4B24C] font-bold">Smith Business Solutions 2026</strong></span>
+            </div>
+
+            <div className="flex items-center gap-2.5 text-[#FBF7EE]/80">
+              <span className="hidden sm:inline text-white/20">|</span>
+              <a
+                href="https://wa.me/584220273766"
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center gap-1 hover:text-[#D4B24C] transition-colors font-mono"
+                title="Contactar al programador por teléfono / WhatsApp"
+              >
+                <Phone className="w-3 h-3 text-[#D4B24C] shrink-0" />
+                <span>04220273766</span>
+              </a>
+
+              <span className="text-white/20">|</span>
+              <a
+                href="mailto:empresaalhadiqainvest@gmail.com"
+                className="flex items-center gap-1 hover:text-[#D4B24C] transition-colors"
+                title="Escribir al correo de Smith Business Solutions"
+              >
+                <Mail className="w-3 h-3 text-[#D4B24C] shrink-0" />
+                <span>empresaalhadiqainvest@gmail.com</span>
+              </a>
+            </div>
+          </div>
         </div>
 
       </div>

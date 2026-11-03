@@ -25,7 +25,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({ onExplore, onOpenStory }
           <div className="lg:col-span-7 space-y-6">
             <div className="inline-flex items-center gap-2 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-[#B8962E] dark:text-[#D4B24C] bg-[#D4B24C]/10 rounded-full border border-[#D4B24C]/30">
               <Sparkles className="w-3.5 h-3.5" />
-              <span>Mercado Local Mayorista & Dropshipping Venezuela</span>
+              <span>Mercado Local Mayorista & Detal Venezuela</span>
             </div>
 
             <div className="space-y-2">

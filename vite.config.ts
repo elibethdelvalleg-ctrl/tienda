@@ -21,7 +21,7 @@ export default defineConfig(() => {
         ],
         manifest: {
           id: '/',
-          name: 'ELIBETH DEL VALLE STORE',
+          name: 'ELIBETH STORE',
           short_name: 'ElibethStore',
           description: 'Tienda de moda venezolana, lencería y prendas al mayor y detal con precios negociables.',
           theme_color: '#3B2A10',

@@ -20,6 +20,7 @@ import { AIAssistantBot } from './components/AIAssistantBot.tsx';
 import { Footer } from './components/Footer.tsx';
 import { PWAInstallButton } from './components/PWAInstallButton.tsx';
 import { OfflineIndicator } from './components/OfflineIndicator.tsx';
+import { StoreSEO } from './components/StoreSEO.tsx';
 import { Product, CartItem, Order, StoreConfig } from './types.ts';
 import { initialProducts, initialStoreConfig } from './data/initialCatalog.ts';
 
@@ -347,15 +348,18 @@ export default function App() {
   const totalCartUnits = cartItems.reduce((acc, i) => acc + i.quantity, 0);
 
   const handleResetCatalog = () => {
-    if (window.confirm("¿Deseas restablecer el catálogo de fábrica? Esto volverá a cargar las prendas iniciales de mayoristas venezolanos con sus precios y fotos.")) {
-      setProducts(initialProducts);
+    setProducts(initialProducts);
+    try {
       localStorage.setItem('edv_products', JSON.stringify(initialProducts));
-    }
+    } catch {}
   };
 
   return (
     <div className="min-h-screen flex flex-col bg-[#FBF7EE] dark:bg-[#12100E] text-[#3B2A10] dark:text-[#FBF7EE] transition-colors duration-300">
       
+      {/* Schema.org Structured Data (JSON-LD) for Store, Organization & Catalog Items */}
+      <StoreSEO products={products} config={config} bcvRate={bcvRate} />
+
       {/* Banner de instalación en Android / PWA para usuarios móviles */}
       <PWAInstallButton variant="banner" />
 

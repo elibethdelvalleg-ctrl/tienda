@@ -1,8 +1,8 @@
 {
   "id": "/",
-  "name": "ELIBETH DEL VALLE STORE",
+  "name": "ELIBETH STORE",
   "short_name": "ElibethStore",
-  "description": "Boutique de moda y dropshipping en Venezuela: ropa íntima, pantalones y prendas deportivas",
+  "description": "Boutique de moda y ventas al mayor en Venezuela: ropa íntima, pantalones y prendas deportivas",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

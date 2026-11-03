@@ -1,23 +1,32 @@
 import React, { useState, useEffect } from 'react';
-import { Star, ThumbsUp, CheckCircle, MessageSquarePlus, Sparkles, Filter, ChevronDown, Check } from 'lucide-react';
+import { Star, ThumbsUp, CheckCircle, MessageSquarePlus, Sparkles, Filter, ChevronDown, Check, Send } from 'lucide-react';
 import { Product, ProductReview } from '../types.ts';
 import { getProductReviews, saveProductReviews } from '../utils/reviewStorage.ts';
+import { StarRatingInput, StarRatingDisplay } from './StarRating.tsx';
 
 interface ProductReviewsSectionProps {
   product: Product;
+  whatsappNumber?: string;
+  openFormSignal?: number;
+  onReviewsChange?: (reviews: ProductReview[]) => void;
 }
 
-export const ProductReviewsSection: React.FC<ProductReviewsSectionProps> = ({ product }) => {
+export const ProductReviewsSection: React.FC<ProductReviewsSectionProps> = ({
+  product,
+  whatsappNumber,
+  openFormSignal,
+  onReviewsChange,
+}) => {
   const [reviews, setReviews] = useState<ProductReview[]>(() => getProductReviews(product));
   const [showForm, setShowForm] = useState(false);
   const [filterRating, setFilterRating] = useState<number | 'all'>('all');
   const [sortBy, setSortBy] = useState<'recent' | 'highest' | 'helpful'>('recent');
   const [helpfulVoted, setHelpfulVoted] = useState<Record<string, boolean>>({});
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [lastSubmittedReview, setLastSubmittedReview] = useState<ProductReview | null>(null);
 
   // Form states
   const [formRating, setFormRating] = useState<number>(5);
-  const [hoverRating, setHoverRating] = useState<number>(0);
   const [formName, setFormName] = useState('');
   const [formCity, setFormCity] = useState('');
   const [formComment, setFormComment] = useState('');
@@ -26,11 +35,23 @@ export const ProductReviewsSection: React.FC<ProductReviewsSectionProps> = ({ pr
 
   // Keep reviews synced when product changes
   useEffect(() => {
-    setReviews(getProductReviews(product));
+    const loaded = getProductReviews(product);
+    setReviews(loaded);
     setShowForm(false);
     setSubmitSuccess(false);
     setFormError('');
   }, [product.id]);
+
+  // Open form when signaled from outside
+  useEffect(() => {
+    if (openFormSignal && openFormSignal > 0) {
+      setShowForm(true);
+      setTimeout(() => {
+        const input = document.getElementById('review-form-name');
+        if (input) input.focus();
+      }, 150);
+    }
+  }, [openFormSignal]);
 
   // Calculations
   const totalReviews = reviews.length;
@@ -107,6 +128,12 @@ export const ProductReviewsSection: React.FC<ProductReviewsSectionProps> = ({ pr
     const updatedReviews = [newReview, ...reviews];
     setReviews(updatedReviews);
     saveProductReviews(product.id, updatedReviews);
+    setLastSubmittedReview(newReview);
+    onReviewsChange?.(updatedReviews);
+
+    try {
+      window.dispatchEvent(new CustomEvent('edv-review-added', { detail: { productId: product.id, review: newReview } }));
+    } catch {}
 
     // Reset form
     setFormName('');
@@ -120,7 +147,7 @@ export const ProductReviewsSection: React.FC<ProductReviewsSectionProps> = ({ pr
 
     setTimeout(() => {
       setSubmitSuccess(false);
-    }, 4000);
+    }, 8000);
   };
 
   const ratingLabels: Record<number, string> = {
@@ -163,9 +190,32 @@ export const ProductReviewsSection: React.FC<ProductReviewsSectionProps> = ({ pr
       </div>
 
       {submitSuccess && (
-        <div className="mb-6 p-3.5 bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-300 dark:border-emerald-800 rounded-xl text-xs text-emerald-800 dark:text-emerald-200 flex items-center gap-2 shadow-sm animate-in fade-in">
-          <CheckCircle className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
-          <span>¡Gracias por tu opinión! Tu reseña ha sido publicada y ayuda a otros compradores venezolanos.</span>
+        <div className="mb-6 p-4 bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-300 dark:border-emerald-800 rounded-2xl text-xs text-emerald-800 dark:text-emerald-200 shadow-sm animate-in fade-in flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <CheckCircle className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+            <div>
+              <p className="font-bold">¡Gracias por tu opinión!</p>
+              <p className="text-[11px] text-emerald-700 dark:text-emerald-300">
+                Tu reseña con estrellas ha sido publicada y ayuda a otros compradores venezolanos.
+              </p>
+            </div>
+          </div>
+
+          {whatsappNumber && lastSubmittedReview && (
+            <button
+              type="button"
+              onClick={() => {
+                const message = encodeURIComponent(
+                  `¡Hola Elibeth Del Valle Store! Acabo de calificar con ${lastSubmittedReview.rating}★ la prenda "${product.name}":\n\n"${lastSubmittedReview.comment}"\n- ${lastSubmittedReview.userName} (${lastSubmittedReview.userCity})`
+                );
+                window.open(`https://wa.me/${whatsappNumber}?text=${message}`, '_blank');
+              }}
+              className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs flex items-center gap-1.5 cursor-pointer whitespace-nowrap shadow-xs transition"
+            >
+              <Send className="w-3.5 h-3.5" />
+              <span>Compartir al WhatsApp</span>
+            </button>
+          )}
         </div>
       )}
 
@@ -177,17 +227,8 @@ export const ProductReviewsSection: React.FC<ProductReviewsSectionProps> = ({ pr
           <span className="font-display text-4xl sm:text-5xl font-extrabold text-[#3B2A10] dark:text-[#F4E7BD] leading-none">
             {averageRating}
           </span>
-          <div className="flex items-center gap-1 my-2">
-            {[1, 2, 3, 4, 5].map((star) => (
-              <Star
-                key={star}
-                className={`w-4 h-4 ${
-                  star <= Math.round(averageRating)
-                    ? 'fill-[#D4B24C] text-[#D4B24C]'
-                    : 'text-stone-300 dark:text-stone-600'
-                }`}
-              />
-            ))}
+          <div className="my-2">
+            <StarRatingDisplay rating={averageRating} size="md" />
           </div>
           <span className="text-xs text-stone-500 dark:text-stone-400 font-medium">
             Basado en {totalReviews} calificaciones
@@ -250,37 +291,16 @@ export const ProductReviewsSection: React.FC<ProductReviewsSectionProps> = ({ pr
             </div>
           )}
 
-          {/* Star selector */}
+          {/* Star selector with StarRatingInput */}
           <div>
             <label className="block text-xs font-bold uppercase tracking-wider text-stone-600 dark:text-stone-300 mb-1.5">
-              Calificación General *
+              Calificación General con Estrellas *
             </label>
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1 bg-white dark:bg-[#12100E] p-2 rounded-xl border border-stone-200 dark:border-stone-700 w-fit">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <button
-                    type="button"
-                    key={star}
-                    onClick={() => setFormRating(star)}
-                    onMouseEnter={() => setHoverRating(star)}
-                    onMouseLeave={() => setHoverRating(0)}
-                    className="p-1 text-stone-300 hover:scale-110 active:scale-95 transition cursor-pointer"
-                    aria-label={`Calificar con ${star} estrellas`}
-                  >
-                    <Star
-                      className={`w-6 h-6 ${
-                        star <= (hoverRating || formRating)
-                          ? 'fill-[#D4B24C] text-[#D4B24C]'
-                          : 'text-stone-300 dark:text-stone-700'
-                      }`}
-                    />
-                  </button>
-                ))}
-              </div>
-              <span className="text-xs font-bold text-[#8B6F38] dark:text-[#D4B24C] pl-2">
-                {ratingLabels[hoverRating || formRating]}
-              </span>
-            </div>
+            <StarRatingInput
+              value={formRating}
+              onChange={(val) => setFormRating(val)}
+              size="md"
+            />
           </div>
 
           {/* User Name & City */}
@@ -290,6 +310,7 @@ export const ProductReviewsSection: React.FC<ProductReviewsSectionProps> = ({ pr
                 Tu Nombre o Apodo *
               </label>
               <input
+                id="review-form-name"
                 type="text"
                 required
                 value={formName}
@@ -355,9 +376,12 @@ export const ProductReviewsSection: React.FC<ProductReviewsSectionProps> = ({ pr
 
           {/* Comment text */}
           <div>
-            <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 mb-1">
-              Tu Reseña / Experiencia *
-            </label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-xs font-bold text-stone-700 dark:text-stone-300">
+                Tu Reseña / Experiencia *
+              </label>
+              <span className="text-[10px] text-stone-400">Mínimo 10 caracteres</span>
+            </div>
             <textarea
               required
               rows={3}
@@ -366,6 +390,29 @@ export const ProductReviewsSection: React.FC<ProductReviewsSectionProps> = ({ pr
               placeholder="Cuéntale a otras compradoras sobre la calidad de la tela, la costura, el color, el empaque o la rapidez del envío por MRW/Zoom..."
               className="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-[#12100E] text-xs focus:outline-hidden focus:ring-2 focus:ring-[#D4B24C]"
             />
+
+            {/* Quick tags to append to comment */}
+            <div className="flex items-center gap-1.5 flex-wrap mt-2">
+              <span className="text-[10px] text-stone-400 font-medium">Frases rápidas:</span>
+              {[
+                'Tela suave y de calidad',
+                'Horma perfecta levanta cola',
+                'Envío rápido por MRW',
+                'Excelente para revender',
+                '100% recomendado'
+              ].map(tag => (
+                <button
+                  key={tag}
+                  type="button"
+                  onClick={() => {
+                    setFormComment(prev => prev ? `${prev}. ${tag}` : tag);
+                  }}
+                  className="text-[10px] px-2 py-0.5 rounded-md bg-stone-200/80 dark:bg-stone-800 text-stone-700 dark:text-stone-300 hover:bg-[#D4B24C]/25 cursor-pointer transition-colors"
+                >
+                  + {tag}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Submit buttons */}

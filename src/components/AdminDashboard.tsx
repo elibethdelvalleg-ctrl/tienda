@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import {
   X, BarChart3, Package, ShoppingCart, Sparkles, Settings, Globe, Plus, Trash2, Edit2,
   Check, RefreshCw, Eye, EyeOff, MessageCircle, ExternalLink, Printer, DollarSign, TrendingUp,
-  AlertTriangle, Upload, Camera, Image as ImageIcon, Sliders, CheckCircle2, Search, RotateCcw
+  AlertTriangle, Upload, Camera, Image as ImageIcon, Sliders, CheckCircle2, Search, RotateCcw,
+  ShieldCheck, Lock, Code2, Phone, Mail
 } from 'lucide-react';
 import { Product, Order, StoreConfig, TrendInsight } from '../types.ts';
 import { formatUsd, formatBs, calculateBs } from '../utils/formatters.ts';
@@ -37,6 +38,41 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   onResetCatalog,
 }) => {
   if (!isOpen) return null;
+
+  const ADMIN_PASSWORD = "15335492";
+
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    try {
+      return sessionStorage.getItem('edv_admin_auth') === 'true';
+    } catch {
+      return false;
+    }
+  });
+  const [passwordInput, setPasswordInput] = useState<string>('');
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [authError, setAuthError] = useState<string>('');
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (passwordInput.trim() === ADMIN_PASSWORD) {
+      setIsAuthenticated(true);
+      setAuthError('');
+      try {
+        sessionStorage.setItem('edv_admin_auth', 'true');
+      } catch {}
+      setPasswordInput('');
+    } else {
+      setAuthError('Contraseña incorrecta. Por favor verifica la clave de acceso.');
+    }
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    try {
+      sessionStorage.removeItem('edv_admin_auth');
+    } catch {}
+    setPasswordInput('');
+  };
 
   // Defaults directly to 'inventory' for rapid catalog management (poner y quitar prendas)
   const [activeTab, setActiveTab] = useState<'inventory' | 'stats' | 'orders' | 'trends' | 'settings' | 'seo'>('inventory');
@@ -180,7 +216,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     setProdCost(6);
     setProdStock(25);
     setProdSku(`MAY-${Math.floor(100 + Math.random() * 899)}`);
-    setProdDesc('Prenda del mercado local venezolano con precio referencial negociable al mayor para dropshipping.');
+    setProdDesc('Prenda del mercado local venezolano con precio referencial negociable al mayor o por volumen.');
     setProdSizes('S, M, L');
     setProdColors('Surtido');
     setProdIsBespoke(false);
@@ -241,7 +277,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       secondaryImage: prodImage,
       deliveryDays: prodIsBespoke ? "7 a 10 días" : "Inmediato (24-48h)",
       featured: true,
-      tags: ["Mayorista", "Dropshipping"],
+      tags: ["Mayorista", "Ventas al Mayor"],
       isNegotiable: prodIsNegotiable,
       minWholesaleQty: Number(prodMinWholesaleQty) || 3,
       supplierOrigin: prodSupplierOrigin,
@@ -386,6 +422,107 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     setShowProductModal(true);
   };
 
+  if (!isAuthenticated) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+        <div 
+          className="relative w-full max-w-md bg-[#FBF7EE] dark:bg-[#12100E] text-[#3B2A10] dark:text-[#FBF7EE] rounded-2xl shadow-2xl border border-[#3B2A10]/20 dark:border-[#D4B24C]/40 overflow-hidden"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Header */}
+          <div className="px-6 py-5 bg-[#3B2A10] dark:bg-[#1A1612] text-[#FBF7EE] border-b border-[#D4B24C]/20 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full overflow-hidden border border-[#D4B24C] shadow-sm">
+                <img src="/assets/aistudio/logoemprendimientoropa_9eefadce.jpeg" alt="" className="w-full h-full object-cover" />
+              </div>
+              <div>
+                <h2 className="font-display text-base font-bold flex items-center gap-2">
+                  <span>Panel Administrativo</span>
+                </h2>
+                <p className="text-[11px] text-[#D4B24C] font-medium">Elibeth Del Valle Store</p>
+              </div>
+            </div>
+            <button
+              onClick={onClose}
+              className="p-1.5 rounded-full hover:bg-white/10 text-white/70 hover:text-white transition-colors cursor-pointer"
+              title="Cerrar"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          {/* Form */}
+          <div className="p-6">
+            <div className="flex items-center justify-center w-12 h-12 mx-auto mb-4 rounded-full bg-[#D4B24C]/15 text-[#B8962E] dark:text-[#D4B24C]">
+              <Lock className="w-6 h-6" />
+            </div>
+
+            <h3 className="text-center font-display text-lg font-bold text-[#3B2A10] dark:text-[#FBF7EE]">
+              Acceso Protegido
+            </h3>
+            <p className="text-center text-xs text-[#3B2A10]/70 dark:text-[#FBF7EE]/70 mt-1 mb-5">
+              Introduce la clave de acceso de seguridad para ingresar a la gestión de inventario, tasa BCV y pedidos.
+            </p>
+
+            {authError && (
+              <div className="mb-4 p-3 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 rounded-xl flex items-center gap-2 text-xs text-red-700 dark:text-red-300">
+                <AlertTriangle className="w-4 h-4 shrink-0" />
+                <span>{authError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleLogin} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-[#3B2A10] dark:text-[#FBF7EE] mb-1.5">
+                  Contraseña de Administrador
+                </label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={passwordInput}
+                    onChange={(e) => {
+                      setPasswordInput(e.target.value);
+                      if (authError) setAuthError('');
+                    }}
+                    placeholder="Introduce la clave de acceso"
+                    autoFocus
+                    required
+                    className="w-full pl-3.5 pr-10 py-2.5 rounded-xl border border-[#3B2A10]/20 dark:border-[#D4B24C]/30 bg-white dark:bg-[#1A1612] text-sm text-[#3B2A10] dark:text-[#FBF7EE] placeholder:text-neutral-400 focus:outline-hidden focus:ring-2 focus:ring-[#D4B24C]"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 cursor-pointer"
+                    title={showPassword ? "Ocultar" : "Mostrar"}
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="flex-1 py-2.5 px-4 rounded-xl border border-[#3B2A10]/20 dark:border-[#D4B24C]/30 text-xs font-semibold text-[#3B2A10] dark:text-[#FBF7EE] hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 py-2.5 px-4 rounded-xl bg-[#3B2A10] dark:bg-[#D4B24C] text-[#D4B24C] dark:text-[#12100E] hover:opacity-90 text-xs font-bold shadow-md cursor-pointer transition-all flex items-center justify-center gap-1.5"
+                >
+                  <ShieldCheck className="w-4 h-4" />
+                  <span>Desbloquear</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 overflow-y-auto bg-black/80 backdrop-blur-md">
       <div 
@@ -411,7 +548,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 sm:gap-4">
             {/* Quick BCV form in header */}
             <form onSubmit={handleSaveBcv} className="hidden sm:flex items-center gap-1.5 bg-white/10 px-2.5 py-1 rounded-lg border border-white/20 text-xs">
               <span className="text-[#D4B24C] font-semibold">Tasa BCV:</span>
@@ -430,6 +567,16 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 {bcvSuccess ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <RefreshCw className={`w-3.5 h-3.5 ${bcvSaving ? 'animate-spin' : ''}`} />}
               </button>
             </form>
+
+            {/* Logout / Lock Button */}
+            <button
+              onClick={handleLogout}
+              className="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-red-500/30 text-white/90 hover:text-red-200 border border-white/20 hover:border-red-500/40 text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
+              title="Cerrar Sesión / Bloquear Panel"
+            >
+              <Lock className="w-3.5 h-3.5 text-[#D4B24C]" />
+              <span className="hidden sm:inline">Bloquear</span>
+            </button>
 
             <button
               onClick={onClose}
@@ -808,7 +955,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         <th className="p-3">Categoría</th>
                         <th className="p-3">Precio USD</th>
                         <th className="p-3">Precio Bs. (BCV)</th>
-                        <th className="p-3">Mayorista / Dropshipping</th>
+                        <th className="p-3">Mayorista / Por Volumen</th>
                         <th className="p-3">Stock & Estado</th>
                         <th className="p-3 text-right">Acciones</th>
                       </tr>
@@ -1407,8 +1554,46 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   <span>Ver robots.txt</span>
                 </a>
               </div>
+
+              {/* Developer & Technical Support Card */}
+              <div className="p-4 bg-gradient-to-r from-[#3B2A10]/10 via-[#D4B24C]/15 to-[#3B2A10]/10 dark:from-[#D4B24C]/10 dark:to-transparent rounded-2xl border border-[#D4B24C]/30 space-y-2.5">
+                <div className="flex items-center gap-2 text-xs font-bold text-[#8B6F38] dark:text-[#D4B24C]">
+                  <Code2 className="w-4 h-4 text-[#D4B24C]" />
+                  <span>Firma de Programador & Soporte Técnico Oficial</span>
+                </div>
+                <p className="text-xs text-[#3B2A10] dark:text-[#FBF7EE] font-medium">
+                  Plataforma desarrollada e implementada por <strong className="text-[#8B6F38] dark:text-[#D4B24C]">Smith Business Solutions 2026</strong>.
+                </p>
+                <div className="flex flex-wrap items-center gap-4 text-xs pt-1">
+                  <a
+                    href="https://wa.me/584220273766"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600/10 hover:bg-emerald-600/20 text-emerald-800 dark:text-emerald-300 font-mono font-semibold transition"
+                  >
+                    <Phone className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                    <span>04220273766</span>
+                  </a>
+                  <a
+                    href="mailto:empresaalhadiqainvest@gmail.com"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#3B2A10]/10 dark:bg-white/10 hover:bg-[#3B2A10]/20 text-[#3B2A10] dark:text-[#FBF7EE] font-medium transition"
+                  >
+                    <Mail className="w-3.5 h-3.5 text-[#D4B24C]" />
+                    <span>empresaalhadiqainvest@gmail.com</span>
+                  </a>
+                </div>
+              </div>
             </div>
           )}
+
+          {/* Admin Dashboard Bottom Credit Bar */}
+          <div className="mt-8 pt-4 border-t border-[#3B2A10]/10 dark:border-[#D4B24C]/20 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-[#3B2A10]/60 dark:text-[#FBF7EE]/60">
+            <span>ELIBETH DEL VALLE STORE · Panel de Control Privado</span>
+            <span className="flex items-center gap-1.5 font-medium">
+              <Code2 className="w-3 h-3 text-[#D4B24C]" />
+              <span>Smith Business Solutions 2026 · 04220273766</span>
+            </span>
+          </div>
 
         </div>
       </div>
@@ -1638,7 +1823,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   </div>
                 </div>
 
-                {/* Dropshipping Negotiation Toggle */}
+                {/* Wholesale Negotiation Toggle */}
                 <div className="flex items-center justify-between p-2 bg-[#FBF7EE] dark:bg-[#1A1612] rounded-lg border border-[#3B2A10]/10 text-xs">
                   <div className="flex items-center gap-2">
                     <input
@@ -1649,7 +1834,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                       className="w-4 h-4 rounded text-[#B8962E] cursor-pointer"
                     />
                     <label htmlFor="prod-negotiable-toggle" className="font-semibold cursor-pointer">
-                      Habilitar botón "Negociar al Mayor por WhatsApp" (Dropshipping)
+                      Habilitar botón "Negociar al Mayor por WhatsApp" (Compras al Mayor / Volumen)
                     </label>
                   </div>
                   <span className="text-[10px] text-[#B8962E] font-bold">Recomendado</span>

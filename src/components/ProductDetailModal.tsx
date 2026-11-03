@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Heart, ShoppingBag, MessageCircle, ShieldCheck, Truck, Ruler, Check, Clock, Sparkles, Star } from 'lucide-react';
-import { Product } from '../types.ts';
+import { Product, ProductReview } from '../types.ts';
 import { formatUsd, formatBs, calculateBs, buildWhatsAppOrderMessage, buildWhatsAppNegotiationMessage } from '../utils/formatters.ts';
 import { ProductReviewsSection } from './ProductReviewsSection.tsx';
 import { getProductReviews } from '../utils/reviewStorage.ts';
+import { StarRatingDisplay } from './StarRating.tsx';
+import { useProductSEO } from '../hooks/useProductSEO.ts';
 
 interface ProductDetailModalProps {
   product: Product | null;
@@ -26,6 +28,9 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
   onToggleFavorite,
   onAddToCart,
 }) => {
+  // Inject product-specific OpenGraph meta tags and Schema.org Product JSON-LD structured data
+  useProductSEO(product, bcvRate);
+
   if (!product) return null;
 
   const [selectedImage, setSelectedImage] = useState<string>(product.image);
@@ -34,6 +39,12 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
   const [quantity, setQuantity] = useState<number>(1);
   const [showSizeGuide, setShowSizeGuide] = useState<boolean>(false);
   const [addedToast, setAddedToast] = useState<boolean>(false);
+  const [reviewsList, setReviewsList] = useState<ProductReview[]>(() => getProductReviews(product));
+  const [openReviewFormSignal, setOpenReviewFormSignal] = useState<number>(0);
+
+  useEffect(() => {
+    setReviewsList(getProductReviews(product));
+  }, [product.id]);
 
   const effectivePriceUsd = product.salePriceUsd || product.priceUsd;
   const effectivePriceBs = calculateBs(effectivePriceUsd, bcvRate);
@@ -95,7 +106,9 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                 alt={product.name}
                 className="w-full h-full object-cover object-center"
                 onError={(e) => {
-                  (e.target as HTMLImageElement).src = "/assets/aistudio/logoemprendimientoropa_9eefadce.jpeg";
+                  const img = e.currentTarget;
+                  img.onerror = null;
+                  img.src = "./assets/aistudio/logoemprendimientoropa_9eefadce.jpeg";
                 }}
               />
 
@@ -161,24 +174,12 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
 
               {/* Star Rating & Reviews anchor */}
               {(() => {
-                const modalReviews = getProductReviews(product);
-                const avg = modalReviews.length > 0
-                  ? (modalReviews.reduce((acc, r) => acc + r.rating, 0) / modalReviews.length).toFixed(1)
+                const avg = reviewsList.length > 0
+                  ? (reviewsList.reduce((acc, r) => acc + r.rating, 0) / reviewsList.length).toFixed(1)
                   : '5.0';
                 return (
-                  <div className="flex items-center gap-2 mt-2 flex-wrap">
-                    <div className="flex items-center gap-0.5">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <Star
-                          key={star}
-                          className={`w-4 h-4 ${
-                            star <= Math.round(Number(avg))
-                              ? 'fill-[#D4B24C] text-[#D4B24C]'
-                              : 'text-stone-300 dark:text-stone-600'
-                          }`}
-                        />
-                      ))}
-                    </div>
+                  <div className="flex items-center gap-2.5 mt-2 flex-wrap">
+                    <StarRatingDisplay rating={Number(avg)} size="md" />
                     <button
                       type="button"
                       onClick={() => {
@@ -187,17 +188,26 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                       }}
                       className="text-xs font-bold text-[#8B6F38] dark:text-[#D4B24C] hover:underline cursor-pointer"
                     >
-                      {avg} ({modalReviews.length} {modalReviews.length === 1 ? 'opinión' : 'opiniones'})
+                      {avg} ({reviewsList.length} {reviewsList.length === 1 ? 'opinión' : 'opiniones'})
                     </button>
                     <span className="text-xs text-stone-300 dark:text-stone-700">·</span>
-                    <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-300 dark:border-emerald-800">
-                      ✓ Clientes Satisfechos
-                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setOpenReviewFormSignal(prev => prev + 1);
+                        const el = document.getElementById('product-reviews-section');
+                        if (el) el.scrollIntoView({ behavior: 'smooth' });
+                      }}
+                      className="text-xs font-bold text-[#8B6F38] dark:text-[#D4B24C] hover:text-[#765E2F] dark:hover:text-white bg-[#D4B24C]/15 hover:bg-[#D4B24C]/30 px-2.5 py-1 rounded-lg border border-[#D4B24C]/35 flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
+                    >
+                      <Star className="w-3.5 h-3.5 fill-[#D4B24C] text-[#D4B24C]" />
+                      <span>Calificar prenda</span>
+                    </button>
                   </div>
                 );
               })()}
 
-              {/* Price Banner with Wholesale & Dropshipping Info */}
+              {/* Price Banner with Wholesale & Volume Sales Info */}
               <div className="mt-3 p-3.5 bg-white dark:bg-[#12100E] rounded-xl border border-[#3B2A10]/10 dark:border-[#D4B24C]/25 space-y-2">
                 <div className="flex items-baseline justify-between">
                   <div>
@@ -235,7 +245,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                 </div>
 
                 <div className="p-2 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 rounded-lg text-[11px] text-amber-900 dark:text-amber-200/90 leading-tight">
-                  <p className="font-semibold">⚠️ Nota de Dropshipping & Mayoristas:</p>
+                  <p className="font-semibold">⚠️ Nota para Mayoristas & Revendedores:</p>
                   <p className="mt-0.5">
                     {product.pricingNotice || "El precio mostrado es referencial y está sujeto a cambios según disponibilidad de mayoristas y tasa del día. ¡Precio 100% negociable al mayor!"}
                   </p>
@@ -451,7 +461,12 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
 
         {/* Sección Completa de Reseñas, Calificaciones con Estrellas y Formulario */}
         <div id="product-reviews-section" className="px-6 sm:px-8 pb-8">
-          <ProductReviewsSection product={product} />
+          <ProductReviewsSection
+            product={product}
+            whatsappNumber={whatsappNumber}
+            openFormSignal={openReviewFormSignal}
+            onReviewsChange={(updated) => setReviewsList(updated)}
+          />
         </div>
       </div>
     </div>

@@ -8,8 +8,8 @@ Esta aplicación está **100% preparada y optimizada** para publicarse de forma 
 ### ✨ Características Autónomas en GitHub Pages (Cero Servidores Requeridos)
 - **Tasa Oficial BCV en Vivo:** Se conecta directamente desde el navegador del cliente a la API oficial (`dolarapi.com`) con CORS habilitado.
 - **Catálogo Venezolano Completo:** Ropa íntima de damas, jeans levanta cola, conjuntos suplex, ropa deportiva y caballeros precargados con imágenes relativas.
-- **Panel Administrativo:** Permite agregar o editar productos, fotos y tasas con persistencia automática en el almacenamiento local (`localStorage`).
-- **Bot Asesor de Estilo & Gestor de Pedidos:** Responde dudas de tallas, dropshipping, calcula precios en bolívares y compila el pedido directamente a **WhatsApp `0422-0217446`**.
+- **Panel Administrativo Protegido con Contraseña:** Protegido con clave de acceso (`15335492`), permite agregar o editar productos, fotos, tasas y pedidos con persistencia automática en el almacenamiento local (`localStorage`).
+- **Bot Asesor de Estilo & Gestor de Pedidos:** Responde dudas de tallas, compras al mayor y por volumen, calcula precios en bolívares y compila el pedido directamente a **WhatsApp `0422-0217446`**.
 
 ---
 

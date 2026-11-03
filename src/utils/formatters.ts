@@ -135,10 +135,10 @@ export function buildWhatsAppNegotiationMessage(data: {
 }): string {
   const qty = data.quantity || 3;
   const lines = [
-    `🦁 *NEGOCIACIÓN / DROPSHIPPING - ELIBETH DEL VALLE STORE*`,
+    `🦁 *NEGOCIACIÓN / COMPRAS AL MAYOR - ELIBETH DEL VALLE STORE*`,
     `_El renacer de mi fuerza_`,
     ``,
-    `¡Hola! Estoy interesado(a) en negociar precio de mayorista / dropshipping:`,
+    `¡Hola! Estoy interesado(a) en negociar precio de mayorista / compra por volumen:`,
     ``,
     `🛍️ *Prenda:* ${data.productName}`,
     `📌 *Código/SKU:* ${data.sku}`,

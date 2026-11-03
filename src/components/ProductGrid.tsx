@@ -88,21 +88,21 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
 
   return (
     <section id="catalogo" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      {/* Dropshipping & Wholesale Notice Banner */}
+      {/* Wholesale Notice Banner */}
       <div className="mb-8 p-4 bg-amber-500/10 dark:bg-amber-500/15 border border-amber-500/30 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-[#3B2A10] dark:text-[#F4E7BD]">
         <div className="flex items-center gap-2.5">
           <span className="text-base">🤝</span>
           <div>
             <p className="font-bold">
-              Precios Referenciales & Dropshipping Negociable
+              Precios Referenciales & Descuentos al Mayor Negociables
             </p>
             <p className="text-[11px] text-[#3B2A10]/80 dark:text-[#FBF7EE]/80">
-              Prendas de mayoristas del mercado venezolano (La Hoyada, El Cementerio y talleres aliados). Los precios están sujetos a cambios y son 100% negociables al mayor o por docena.
+              Prendas de mayoristas del mercado venezolano (La Hoyada, El Cementerio y talleres aliados). Los precios están sujetos a cambios y son 100% negociables por volumen o por docena.
             </p>
           </div>
         </div>
         <a
-          href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent("🦁 ¡Hola! Deseo información para hacer Dropshipping o comprar al mayor prendas del catálogo.")}`}
+          href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent("🦁 ¡Hola! Deseo información para compras al mayor o prendas del catálogo.")}`}
           target="_blank"
           rel="noreferrer"
           className="px-3 py-1.5 bg-[#3B2A10] dark:bg-[#D4B24C] text-[#FBF7EE] dark:text-[#12100E] font-bold rounded-lg shrink-0 hover:opacity-90 transition-opacity"
@@ -119,7 +119,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
             <span>Mercado Local Mayorista</span>
           </div>
           <h2 className="font-display text-2xl sm:text-3xl font-bold text-[#3B2A10] dark:text-[#FBF7EE] mt-1">
-            Prendas de Alta Rotación para Detal & Dropshipping
+            Prendas de Alta Rotación para Detal & Compras al Mayor
           </h2>
           <p className="text-xs sm:text-sm text-[#3B2A10]/70 dark:text-[#FBF7EE]/70 mt-1 max-w-xl">
             Ropa íntima de dama, jeans levanta cola, pantalones cargo, franelas deportivas y prendas de caballero.

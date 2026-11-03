@@ -3,13 +3,111 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ELIBETH DEL VALLE STORE | El renacer de mi fuerza</title>
-    <meta name="description" content="Plataforma e-commerce y dropshipping de moda en Venezuela: ropa íntima, pantalones colombianos, franelas deportivas de mayoristas y caballeros, precios referenciales y negociables con conversión oficial BCV." />
-    <meta property="og:title" content="ELIBETH DEL VALLE STORE | El renacer de mi fuerza" />
-    <meta property="og:description" content="Moda al detal, mayor y dropshipping en Venezuela: ropa íntima, pantalones, franelas deportivas y caballeros. Precios negociables en USD y Bs. BCV." />
+    <!-- Gracefully handle Vite dev HMR WebSocket connection in AI Studio iframe environment -->
+    <script>
+      (function() {
+        if (typeof window === 'undefined' || !window.WebSocket) return;
+        var OrigWebSocket = window.WebSocket;
+        function PatchedWebSocket(url, protocols) {
+          var isHmr = protocols === 'vite-hmr' || 
+            (typeof url === 'string' && (url.indexOf('token=') !== -1 || url.indexOf(':24678') !== -1));
+          if (isHmr) {
+            var listeners = {};
+            var fakeWs = {
+              readyState: 1, // OPEN
+              OPEN: 1,
+              CONNECTING: 0,
+              CLOSING: 2,
+              CLOSED: 3,
+              url: url,
+              protocol: protocols,
+              addEventListener: function(evt, cb) {
+                if (!listeners[evt]) listeners[evt] = [];
+                listeners[evt].push(cb);
+                if (evt === 'open') {
+                  setTimeout(function() {
+                    try { cb({ type: 'open', target: fakeWs }); } catch (e) {}
+                  }, 0);
+                }
+              },
+              removeEventListener: function(evt, cb) {
+                if (!listeners[evt]) return;
+                listeners[evt] = listeners[evt].filter(function(fn) { return fn !== cb; });
+              },
+              dispatchEvent: function(event) {
+                var cbs = listeners[event && event.type] || [];
+                cbs.forEach(function(fn) { try { fn(event); } catch (e) {} });
+                return true;
+              },
+              send: function() {},
+              close: function() {
+                fakeWs.readyState = 3;
+                var cbs = listeners['close'] || [];
+                cbs.forEach(function(fn) { try { fn({ type: 'close', target: fakeWs, code: 1000, wasClean: true }); } catch (e) {} });
+              }
+            };
+            return fakeWs;
+          }
+          return new OrigWebSocket(url, protocols);
+        }
+        PatchedWebSocket.prototype = OrigWebSocket.prototype;
+        PatchedWebSocket.OPEN = OrigWebSocket.OPEN;
+        PatchedWebSocket.CONNECTING = OrigWebSocket.CONNECTING;
+        PatchedWebSocket.CLOSING = OrigWebSocket.CLOSING;
+        PatchedWebSocket.CLOSED = OrigWebSocket.CLOSED;
+        window.WebSocket = PatchedWebSocket;
+
+        window.addEventListener('unhandledrejection', function(event) {
+          var reason = event && event.reason;
+          var msg = (reason && reason.message) || String(reason || '');
+          var stack = (reason && reason.stack) || '';
+          if (
+            msg.indexOf('WebSocket') !== -1 ||
+            msg.indexOf('createWebSocketModuleRunnerTransport') !== -1 ||
+            stack.indexOf('@vite/client') !== -1 ||
+            stack.indexOf('createWebSocketModuleRunnerTransport') !== -1
+          ) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+          }
+        }, true);
+
+        window.addEventListener('error', function(event) {
+          var msg = (event && event.message) || '';
+          var filename = (event && event.filename) || '';
+          var stack = (event && event.error && event.error.stack) || '';
+          if (
+            msg.indexOf('WebSocket') !== -1 ||
+            msg.indexOf('createWebSocketModuleRunnerTransport') !== -1 ||
+            filename.indexOf('@vite/client') !== -1 ||
+            stack.indexOf('createWebSocketModuleRunnerTransport') !== -1
+          ) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+          }
+        }, true);
+      })();
+    </script>
+    
+    <!-- Primary SEO Page Title & Description (Applet SEO standard: 30-60 chars title, 120-160 chars description) -->
+    <title>ELIBETH STORE | Moda & Ventas al Mayor Venezuela</title>
+    <meta name="description" content="Boutique de moda y ventas al mayor en Venezuela: lencería fina, jeans levanta cola y ropa deportiva. Precios al mayor negociables y conversión oficial BCV." />
+
+    <!-- OpenGraph Social Sharing Metadata -->
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="ELIBETH STORE" />
+    <meta property="og:title" content="ELIBETH STORE | Moda & Ventas al Mayor Venezuela" />
+    <meta property="og:description" content="Boutique de moda y ventas al mayor en Venezuela: lencería fina, jeans levanta cola y ropa deportiva. Precios al mayor negociables y conversión oficial BCV." />
     <meta property="og:image" content="/assets/aistudio/logoemprendimientoropa_9eefadce.jpeg" />
+    <meta property="og:locale" content="es_VE" />
+
+    <!-- Twitter / X Card Metadata -->
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="ELIBETH STORE | Moda & Ventas al Mayor Venezuela" />
+    <meta name="twitter:description" content="Boutique de moda y ventas al mayor en Venezuela: lencería fina, jeans levanta cola y ropa deportiva. Precios al mayor negociables y conversión oficial BCV." />
+    <meta name="twitter:image" content="/assets/aistudio/logoemprendimientoropa_9eefadce.jpeg" />
+
+    <!-- PWA & Mobile Web App Manifest & Icons -->
     <link rel="icon" type="image/png" href="./pwa-192x192.png" />
     <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
     <link rel="manifest" href="./manifest.webmanifest" />
@@ -23,10 +121,22 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400;1,600&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Schema.org WebSite JSON-LD with SearchAction -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "ELIBETH STORE",
+      "alternateName": "Elibeth Store",
+      "url": "https://elibethdelvallestore.com",
+      "description": "Tienda en línea de moda venezolana con ventas al detal y precios al mayor referenciales a tasa oficial BCV.",
+      "inLanguage": "es-VE"
+    }
+    </script>
   </head>
   <body class="bg-[#FBF7EE] text-[#3B2A10] dark:bg-[#12100E] dark:text-[#F7F2E7] antialiased selection:bg-[#D4B24C]/30 selection:text-[#3B2A10] dark:selection:text-[#FBF7EE]">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
-

@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Heart, ShoppingBag, Eye, MessageCircle, Clock, Check, Star } from 'lucide-react';
 import { Product } from '../types.ts';
 import { formatUsd, formatBs, calculateBs, buildWhatsAppOrderMessage, buildWhatsAppNegotiationMessage } from '../utils/formatters.ts';
 import { getProductReviews } from '../utils/reviewStorage.ts';
+import { StarRatingDisplay } from './StarRating.tsx';
 
 interface ProductCardProps {
   product: Product;
@@ -27,6 +28,17 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [addedAnimation, setAddedAnimation] = useState(false);
+  const [reviewCountSync, setReviewCountSync] = useState(0);
+
+  useEffect(() => {
+    const handleReviewAdded = (e: any) => {
+      if (e.detail?.productId === product.id) {
+        setReviewCountSync(prev => prev + 1);
+      }
+    };
+    window.addEventListener('edv-review-added', handleReviewAdded);
+    return () => window.removeEventListener('edv-review-added', handleReviewAdded);
+  }, [product.id]);
 
   const defaultSize = product.sizes[0] || 'Única';
   const defaultColor = product.colors[0] || 'Estándar';
@@ -85,7 +97,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           className="w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105"
           referrerPolicy="no-referrer"
           onError={(e) => {
-            (e.target as HTMLImageElement).src = "/assets/aistudio/logoemprendimientoropa_9eefadce.jpeg";
+            const img = e.currentTarget;
+            img.onerror = null;
+            img.src = "./assets/aistudio/logoemprendimientoropa_9eefadce.jpeg";
           }}
         />
 
@@ -163,6 +177,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 
           {/* Star rating indicator */}
           {(() => {
+            // reviewCountSync triggers re-render when a new review is submitted
+            void reviewCountSync;
             const cardReviews = getProductReviews(product);
             const cardAvg = cardReviews.length > 0 
               ? (cardReviews.reduce((acc, r) => acc + r.rating, 0) / cardReviews.length).toFixed(1)
@@ -172,15 +188,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                 onClick={() => onQuickView(product)}
                 className="flex items-center gap-1.5 mt-1 cursor-pointer group-hover:opacity-90"
               >
-                <div className="flex items-center gap-0.5">
-                  <Star className="w-3.5 h-3.5 fill-[#D4B24C] text-[#D4B24C]" />
-                </div>
-                <span className="text-[11px] font-bold text-[#8B6F38] dark:text-[#D4B24C]">
-                  {cardAvg}
-                </span>
-                <span className="text-[10px] text-stone-400">
-                  ({cardReviews.length})
-                </span>
+                <StarRatingDisplay rating={Number(cardAvg)} size="xs" showValue count={cardReviews.length} />
               </div>
             );
           })()}
@@ -276,7 +284,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
               window.open(`https://wa.me/${whatsappNumber}?text=${encoded}`, '_blank');
             }}
             className="py-2 px-2 rounded-lg text-xs font-bold border border-emerald-600/50 bg-emerald-50/50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 flex items-center justify-center gap-1 transition-colors cursor-pointer"
-            title="Negociar precio especial al mayor o dropshipping"
+            title="Negociar precio especial al mayor o compra por volumen"
           >
             <MessageCircle className="w-3.5 h-3.5 text-emerald-600" />
             <span>Negociar</span>

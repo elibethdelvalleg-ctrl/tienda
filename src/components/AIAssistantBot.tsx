@@ -57,7 +57,7 @@ export const AIAssistantBot: React.FC<AIAssistantBotProps> = ({
   const initialGreeting: Message = {
     id: 'msg-welcome',
     sender: 'assistant',
-    text: `¡Hola bella/o! Bienvenida(o) a **ELIBETH DEL VALLE STORE** 🦁✨ (*El renacer de mi fuerza*).\n\nSoy tu **Asesora Virtual de Moda y Pedidos**. Te ayudo a:\n• 👗 Encontrar la prenda ideal (lencería, jeans levanta cola, suplex deportivo o ropa para caballero).\n• 💵 Calcular precios en **Bolívares a Tasa Oficial BCV** (Hoy: **Bs. ${bcvRate.toFixed(2)} / $**).\n• 💼 Guiarte en **compras al mayor y dropshipping** con precios negociables.\n• 📲 **Gestionar y enviar tu pedido** directo a nuestro WhatsApp oficial **0422-0217446**.\n\n¿En qué te puedo asesorar hoy?`,
+    text: `¡Hola bella/o! Bienvenida(o) a **ELIBETH DEL VALLE STORE** 🦁✨ (*El renacer de mi fuerza*).\n\nSoy tu **Asesora Virtual de Moda y Pedidos**. Te ayudo a:\n• 👗 Encontrar la prenda ideal (lencería, jeans levanta cola, suplex deportivo o ropa para caballero).\n• 💵 Calcular precios en **Bolívares a Tasa Oficial BCV** (Hoy: **Bs. ${bcvRate.toFixed(2)} / $**).\n• 💼 Guiarte en **compras al mayor y precios por volumen** negociables.\n• 📲 **Gestionar y enviar tu pedido** directo a nuestro WhatsApp oficial **0422-0217446**.\n\n¿En qué te puedo asesorar hoy?`,
     timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     suggestedProducts: products.slice(0, 3)
   };
@@ -66,7 +66,7 @@ export const AIAssistantBot: React.FC<AIAssistantBotProps> = ({
   const [quickReplies, setQuickReplies] = useState<string[]>([
     "👗 Ver lencería en tendencia",
     "👖 Jeans Levanta Cola",
-    "💼 Comprar al mayor / Dropshipping",
+    "💼 Comprar al mayor / Precios por volumen",
     "📲 Gestionar pedido a WhatsApp",
     "💵 Tasa oficial BCV"
   ]);
@@ -150,7 +150,7 @@ export const AIAssistantBot: React.FC<AIAssistantBotProps> = ({
       let replies = [
         "👗 Ver lencería en tendencia",
         "👖 Jeans Levanta Cola",
-        "💼 Precios al mayor / Dropshipping",
+        "💼 Precios al mayor / Por volumen",
         "📲 Enviar Pedido a WhatsApp"
       ];
 
@@ -174,13 +174,13 @@ export const AIAssistantBot: React.FC<AIAssistantBotProps> = ({
         suggested = products.filter(p => p.category === 'intima').slice(0, 3);
         const p1 = suggested[0];
         const bsPrice = p1 ? (p1.priceUsd * bcvRate).toLocaleString('es-VE', { minimumFractionDigits: 2 }) : "12.450,00";
-        reply = `¡Nuestra línea de ropa íntima femenina es sensacional! Confeccionada con encajes franceses de tacto suave, bralettes de realce sin varilla y fajas moldeadoras.\n\n💰 **Precios desde $${p1?.priceUsd || 14} USD** (~Bs. ${bsPrice} al BCV). ¡Precios especiales negociables por docena o para dropshipping!`;
+        reply = `¡Nuestra línea de ropa íntima femenina es sensacional! Confeccionada con encajes franceses de tacto suave, bralettes de realce sin varilla y fajas moldeadoras.\n\n💰 **Precios desde $${p1?.priceUsd || 14} USD** (~Bs. ${bsPrice} al BCV). ¡Precios especiales negociables por docena o para revendedores!`;
         replies = ["Ver tallas disponibles", "Precios al mayor", "Agregar al carrito", "WhatsApp 0422-0217446"];
       } else if (lower.includes("jean") || lower.includes("pantalon") || lower.includes("levanta cola") || lower.includes("colombian")) {
         suggested = products.filter(p => p.category === 'pantalones').slice(0, 3);
         const p1 = suggested[0];
         const bsPrice = p1 ? (p1.priceUsd * bcvRate).toLocaleString('es-VE', { minimumFractionDigits: 2 }) : "24.900,00";
-        reply = `¡Los Jeans Levanta Cola colombianos son los favoritos en Venezuela! Vienen con pretina ancha faja de 3 a 5 botones y pinzas traseras que realzan y estilizan la silueta.\n\n📐 **Tallas:** 4, 6, 8, 10, 12, 14.\n💵 **Precio:** $${p1?.priceUsd || 28} USD (~Bs. ${bsPrice} Tasa BCV).\n🤝 **Mayoristas / Dropshipping:** Margen superior al 50%.`;
+        reply = `¡Los Jeans Levanta Cola colombianos son los favoritos en Venezuela! Vienen con pretina ancha faja de 3 a 5 botones y pinzas traseras que realzan y estilizan la silueta.\n\n📐 **Tallas:** 4, 6, 8, 10, 12, 14.\n💵 **Precio:** $${p1?.priceUsd || 28} USD (~Bs. ${bsPrice} Tasa BCV).\n🤝 **Mayoristas / Por volumen:** Margen superior al 50%.`;
         replies = ["Guía de medidas", "Jeans oscuros", "Armar pedido por WhatsApp", "Ver catálogo completo"];
       } else if (lower.includes("deport") || lower.includes("suplex") || lower.includes("licra") || lower.includes("gym")) {
         suggested = products.filter(p => p.category === 'deportivo').slice(0, 3);
@@ -195,12 +195,12 @@ export const AIAssistantBot: React.FC<AIAssistantBotProps> = ({
       } else if (lower.includes("bcv") || lower.includes("tasa") || lower.includes("dolar") || lower.includes("bolivar") || lower.includes("bs")) {
         reply = `En **ELIBETH DEL VALLE STORE** calculamos todos los precios estrictamente a la **tasa oficial del BCV**:\n\n🇻🇪 **Tasa Oficial BCV:** Bs. **${bcvRate.toFixed(2)}** por USD.\n\nAceptamos **Pago Móvil (0422-021-7446)**, transferencias bancarias, Zelle y Binance USDT.`;
         replies = ["Ver productos", "Formas de pago", "Calcular pedido en Bs.", "WhatsApp 0422-0217446"];
-      } else if (lower.includes("mayor") || lower.includes("dropshipping") || lower.includes("emprend") || lower.includes("negocia")) {
-        reply = `💼 **¡Gana dinero con nuestro programa de Dropshipping y Reventa en Venezuela!**\n\n1. **Precios Negociables:** Descuentos a partir de 3 o 6 prendas surtidas o por bulto cerrado.\n2. **Sin inversión previa:** Publicas nuestras fotos y despachamos directo a tu cliente por MRW, Zoom o Tealca.\n3. **Márgenes del 50% al 70%** en lencería y jeans.\n\nEscríbenos al WhatsApp directo **0422-0217446** para darte la lista de precios mayorista.`;
+      } else if (lower.includes("mayor") || lower.includes("reventa") || lower.includes("emprend") || lower.includes("negocia") || lower.includes("volumen")) {
+        reply = `💼 **¡Impulsa tus ventas con nuestros precios de Mayorista y Reventa en Venezuela!**\n\n1. **Precios Negociables:** Descuentos a partir de 3 o 6 prendas surtidas o por bulto cerrado.\n2. **Envíos Nacionales:** Despachamos directo a tu dirección o agencia por MRW, Zoom o Tealca con seguro.\n3. **Márgenes del 50% al 70%** en lencería y jeans.\n\nEscríbenos al WhatsApp directo **0422-0217446** para darte la lista de precios mayorista.`;
         replies = ["Contactar al 04220217446", "Ver lencería al mayor", "Ver jeans al mayor", "Envíos nacionales"];
       } else {
         suggested = products.slice(0, 3);
-        reply = `¡Hola bella/o! Estoy para ayudarte en **ELIBETH DEL VALLE STORE** 🦁 (*El renacer de mi fuerza*).\n\nPuedo ayudarte con:\n• 👗 Recomendaciones de estilo y tallas.\n• 💵 Precios en Bolívares a tasa oficial BCV (**Bs. ${bcvRate.toFixed(2)} / $**).\n• 💼 Descuentos de compras al mayor y dropshipping.\n• 📲 Enviar tu pedido directo al WhatsApp **0422-0217446**.\n\n¿Qué te gustaría ver hoy?`;
+        reply = `¡Hola bella/o! Estoy para ayudarte en **ELIBETH DEL VALLE STORE** 🦁 (*El renacer de mi fuerza*).\n\nPuedo ayudarte con:\n• 👗 Recomendaciones de estilo y tallas.\n• 💵 Precios en Bolívares a tasa oficial BCV (**Bs. ${bcvRate.toFixed(2)} / $**).\n• 💼 Descuentos de compras al mayor y por volumen.\n• 📲 Enviar tu pedido directo al WhatsApp **0422-0217446**.\n\n¿Qué te gustaría ver hoy?`;
       }
 
       const whatsappUrl = orderSummary

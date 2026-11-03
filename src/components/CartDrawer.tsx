@@ -182,7 +182,9 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                     alt={item.product.name}
                     className="w-18 h-22 object-cover rounded-lg shrink-0"
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src = "/assets/aistudio/logoemprendimientoropa_9eefadce.jpeg";
+                      const img = e.currentTarget;
+                      img.onerror = null;
+                      img.src = "./assets/aistudio/logoemprendimientoropa_9eefadce.jpeg";
                     }}
                   />
 

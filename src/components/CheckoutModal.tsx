@@ -42,6 +42,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const [paymentRef, setPaymentRef] = useState('');
   const [voucherUrl, setVoucherUrl] = useState('');
   const [voucherFileName, setVoucherFileName] = useState('');
+  const [errorMessage, setErrorMessage] = useState<string>('');
 
   // Math
   const subtotalUsd = items.reduce((acc, item) => acc + item.subtotalUsd, 0);
@@ -78,11 +79,12 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
 
   const handleSubmitOrder = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!customerName || !customerPhone || !deliveryAddress) {
-      alert("Por favor completa los campos de contacto y dirección");
+    if (!customerName.trim() || !customerPhone.trim() || !deliveryAddress.trim()) {
+      setErrorMessage("Por favor completa los campos requeridos: nombre, teléfono y dirección o agencia.");
       return;
     }
 
+    setErrorMessage('');
     setSubmitting(true);
     try {
       const payload = {
@@ -120,7 +122,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
         onOrderSuccess(data.order);
         setStep(4);
       } else {
-        alert(data.error || "Error al registrar el pedido");
+        setErrorMessage(data.error || "Error al registrar el pedido. Por favor verifica tus datos.");
       }
     } catch (err) {
       console.error(err);
@@ -228,6 +230,19 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
         )}
 
         <div className="p-6">
+          {errorMessage && (
+            <div className="mb-4 p-3 bg-red-50 dark:bg-red-950/40 border border-red-300 dark:border-red-800 rounded-xl text-xs text-red-700 dark:text-red-300 font-medium animate-in fade-in flex items-center justify-between">
+              <span>{errorMessage}</span>
+              <button 
+                type="button" 
+                onClick={() => setErrorMessage('')} 
+                className="text-red-500 hover:text-red-800 font-bold ml-2 text-sm leading-none"
+              >
+                ×
+              </button>
+            </div>
+          )}
+
           {/* STEP 1: Customer Data */}
           {step === 1 && (
             <div className="space-y-4">
